@@ -1,4 +1,4 @@
-name: Build Workshop Executables
+name: Build Executables
 
 on:
   push:
@@ -103,7 +103,7 @@ jobs:
       shell: bash
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ matrix.asset_name }}
         path: dist/${{ matrix.asset_name }}
