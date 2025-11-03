@@ -10,11 +10,11 @@ TEMPO: 15 minutos
 O QUE VOCE VAI APRENDER:
 - Diferenca entre Memory (conversacao) e State (workflow/dados)
 - Criar state com TypedDict
-- Funcoes que recebem e retornam state
+- Funções que recebem e retornam state
 - Manter dados estruturados durante processamento
 
 CONTEXTO:
-No exercicio anterior vimos Memory para conversacao. Agora vamos aprender
+No exercício anterior vimos Memory para conversação. Agora vamos aprender
 State, que e diferente:
 
 MEMORY: Guarda historico de CONVERSAS (perguntas e respostas)
@@ -46,14 +46,14 @@ class AnalysisState(TypedDict):
     # TODO 1.1: Adicione os campos do state:
 
     # files_to_process: Lista de arquivos que ainda precisam ser analisados
-    files_to_process: List[str]  # Ja feito como exemplo
+    files_to_process: list[str]  # Ja feito como exemplo
 
     # TODO: Adicione os outros campos:
-    # files_processed: List[str]  # Arquivos ja processados
+    # files_processed: list[str]  # Arquivos ja processados
     # current_file: str  # Arquivo sendo processado agora
     # total_functions: int  # Total de funcoes encontradas ate agora
     # total_lines: int  # Total de linhas de codigo
-    # errors: List[str]  # Lista de erros encontrados
+    # errors: list[str]  # Lista de erros encontrados
 
 
 # ============================================================================

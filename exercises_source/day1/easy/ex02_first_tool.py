@@ -4,7 +4,7 @@ Exercício 2 - Adicionando Sua Primeira Tool (EASY)
 
 OBJETIVO: Adicionar UMA tool customizada ao agente.
 
-TEMPO: 15 minutos
+TEMPO: 10 minutos
 
 O QUE VOCÊ VAI APRENDER:
 - Criar uma tool com @tool decorator
@@ -21,7 +21,7 @@ O agente vai DECIDIR quando usar essa ferramenta.
 
 from pathlib import Path
 from langchain.agents import create_agent
-from langchain_core.tools import tool
+from langchain.tools import tool
 from langchain_openai import ChatOpenAI
 
 # ============================================================================
@@ -65,18 +65,17 @@ def create_agent_with_tool():
     llm = None  # TODO: ChatOpenAI(model="gpt-5-nano", temperature=0)
 
     # TODO 2.2: Criar lista de tools COM list_python_files
-    # IMPORTANTE: Agora a lista NÃO está vazia!
-    tools = []  # TODO: [list_python_files]
+    tools = []
 
     # TODO 2.3: Criar agente usando create_agent
-    # DICA: Na API 1.0+, create_agent(llm, tools) retorna um CompiledStateGraph
     agent = None  # TODO: create_agent(llm, tools)
 
     return agent
 
 
 # ============================================================================
-# Testes (NÃO MODIFIQUE)
+# Teste local (use para testar seu código)
+# Use o comando `run` para executar o teste
 # ============================================================================
 
 def test_agent():
@@ -90,7 +89,6 @@ def test_agent():
         print("TESTE 1: Pedir para listar arquivos (deve usar a tool)")
         print("=" * 60)
 
-        # API 1.0+ usa messages
         response = agent.invoke({
             "messages": [{"role": "user", "content": "Liste todos os arquivos Python no diretório ./sample_project"}]
         })

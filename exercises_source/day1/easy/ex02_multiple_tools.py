@@ -24,7 +24,7 @@ O agente vai DECIDIR qual tool usar baseado na pergunta do usuário.
 
 from pathlib import Path
 from langchain.agents import create_agent
-from langchain_core.tools import tool
+from langchain.tools import tool
 from langchain_openai import ChatOpenAI
 
 # Importar a tool do exercício anterior
@@ -49,7 +49,6 @@ def read_file(file_path: str) -> str:
     """
     # TODO: Implemente a leitura do arquivo
     # DICA: Use open(file_path, 'r', encoding='utf-8')
-    # DICA: Não esqueça de tratar erros (arquivo não existe, etc)
 
     try:
         # TODO: Abra e leia o arquivo
@@ -111,27 +110,24 @@ def count_lines(file_path: str) -> str:
 # ============================================================================
 
 def create_multi_tool_agent():
-    """Cria agente com 3 tools: list_python_files, read_file, count_lines."""
-
     # TODO 3.1: Criar LLM
     llm = None  # TODO: ChatOpenAI(model="gpt-5-nano", temperature=0)
 
-    # TODO 3.2: Criar lista de tools com as 3 ferramentas
-    # IMPORTANTE: Agora temos 3 tools!
-    tools = []  # TODO: [list_python_files, read_file, count_lines]
+    # TODO 3.2: Adicione as 3 ferramentas na lista
+    tools = []
 
     # TODO 3.3: Criar agente usando create_agent
-    agent = None  # TODO: create_agent(llm, tools)
+    agent = None
 
     return agent
 
 
 # ============================================================================
-# Testes (NÃO MODIFIQUE)
+# Teste local (use para testar seu código)
+# Use o comando `run` para executar o teste
 # ============================================================================
 
 def test_agent():
-    """Testa o agente com múltiplas tools."""
     print("🤖 Testando agente com 3 tools...\n")
 
     try:
@@ -166,7 +162,6 @@ def test_agent():
             print(f"Expectativa: {test['description']}")
             print("=" * 70)
 
-            # API 1.0+ usa messages
             response = agent.invoke({
                 "messages": [{"role": "user", "content": test['query']}]
             })

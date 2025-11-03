@@ -133,6 +133,8 @@ class WorkshopSession:
             "hint": self._cmd_hint,
             "h": self._cmd_hint,
             "test": self._cmd_test,
+            "run": self._cmd_run,
+            "r": self._cmd_run,
             "reset": self._cmd_reset,
             "next": self._cmd_next,
             "prev": self._cmd_prev,
@@ -160,7 +162,8 @@ class WorkshopSession:
 
 [bold]Exercícios:[/bold]
   hint, h          - Pede próxima dica para exercício atual
-  test <num>       - Roda testes de um exercício específico
+  test <num>       - Roda testes de um exercício específico (força execução)
+  run, r <num>     - Executa o arquivo do exercício (sem rodar testes)
   reset <num>      - Reseta exercício para estado original
   next             - Vai para próximo exercício (se atual completo)
   prev             - Volta para exercício anterior (apenas visualizar)
@@ -193,16 +196,31 @@ class WorkshopSession:
         """Roda testes manualmente"""
         if not args:
             current_ex = self.progress.get_current_exercise()
-            self.run_tests(current_ex)
+            self.run_tests(current_ex, force=True)
         else:
             try:
                 ex_num = int(args[0])
                 if 1 <= ex_num <= 8:
-                    self.run_tests(ex_num)
+                    self.run_tests(ex_num, force=True)
                 else:
                     console.print("[red]❌ Número de exercício inválido (1-8)[/red]")
             except ValueError:
                 console.print("[red]❌ Use: test <número>[/red]")
+
+    def _cmd_run(self, args):
+        """Executa o arquivo do exercício diretamente"""
+        if not args:
+            current_ex = self.progress.get_current_exercise()
+            self.run_exercise_file(current_ex)
+        else:
+            try:
+                ex_num = int(args[0])
+                if 1 <= ex_num <= 8:
+                    self.run_exercise_file(ex_num)
+                else:
+                    console.print("[red]❌ Número de exercício inválido (1-8)[/red]")
+            except ValueError:
+                console.print("[red]❌ Use: run <número>[/red]")
 
     def _cmd_reset(self, args):
         """Reseta exercício"""
@@ -300,8 +318,67 @@ class WorkshopSession:
             # Em caso de erro, permite testar
             return True
 
-    def run_tests(self, exercise_num: int):
-        """Executa testes para um exercício"""
+    def run_exercise_file(self, exercise_num: int):
+        """Executa o arquivo do exercício diretamente (sem testes)"""
+        try:
+            ex_info = self.progress.get_exercise_info(exercise_num)
+        except KeyError:
+            console.print(f"[red]❌ Exercício {exercise_num} não encontrado[/red]")
+            return
+
+        day_dir = self.exercises_dir / f"day{ex_info['day']}"
+        exercise_path = day_dir / f"{ex_info['file']}.py"
+
+        if not exercise_path.exists():
+            console.print(f"[red]❌ Arquivo não encontrado: {exercise_path}[/red]")
+            return
+
+        ex_name = EXERCISES[exercise_num]["name"]
+        console.print(f"\n[yellow]🚀 Executando Exercício {exercise_num}: {ex_name}...[/yellow]")
+        console.print(f"[dim]Arquivo: {exercise_path}[/dim]\n")
+
+        # Prepara ambiente
+        api_key = self.api_manager.get_api_key()
+        env = setup_environment_for_test(api_key)
+        env['WORKSHOP_LEVEL'] = self.user_level
+
+        try:
+            result = subprocess.run(
+                [sys.executable, str(exercise_path)],
+                capture_output=True,
+                text=True,
+                env=env,
+                timeout=60,
+                cwd=str(self.project_root)
+            )
+
+            # Mostra output
+            if result.stdout:
+                console.print(result.stdout)
+
+            if result.stderr:
+                console.print("[red]Erros:[/red]")
+                console.print(result.stderr)
+
+            if result.returncode != 0:
+                console.print(f"\n[red]❌ Programa terminou com código de erro: {result.returncode}[/red]")
+            else:
+                console.print(f"\n[green]✅ Execução concluída[/green]")
+
+        except subprocess.TimeoutExpired:
+            console.print("[red]❌ Timeout - execução demorou mais de 60 segundos[/red]")
+        except Exception as e:
+            console.print(f"[red]❌ Erro ao executar: {e}[/red]")
+
+        console.print()
+
+    def run_tests(self, exercise_num: int, force: bool = False):
+        """Executa testes para um exercício
+
+        Args:
+            exercise_num: Número do exercício
+            force: Se True, força execução mesmo se já estiver completo
+        """
         if self.current_test_running:
             console.print("[yellow]⏳ Aguarde o teste atual terminar...[/yellow]")
             return
@@ -312,6 +389,14 @@ class WorkshopSession:
             # Verifica se pode acessar exercício
             if not self.progress.can_access_exercise(exercise_num):
                 console.print(f"[red]❌ Exercício {exercise_num} bloqueado. Complete os anteriores primeiro.[/red]")
+                return
+
+            # Verifica se já está completo (só se não forçado)
+            if not force and self.progress.is_exercise_completed(exercise_num):
+                ex_name = EXERCISES[exercise_num]["name"]
+                console.print(f"\n[green]✅ Exercício {exercise_num}: {ex_name}[/green]")
+                console.print("[dim]Este exercício já está completo.[/dim]")
+                console.print(f"[dim]Use 'test {exercise_num}' para forçar a execução dos testes novamente.[/dim]\n")
                 return
 
             # Verifica se o exercício está marcado como "I AM NOT DONE"

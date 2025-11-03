@@ -1,195 +1,227 @@
 """
-Exercício 4 - Adicionando Memory ao Agente (EASY)
-==================================================
+Exercício 3 - Memory com RunnableWithMessageHistory (EASY)
+===========================================================
 
-OBJETIVO: Fazer o agente lembrar de conversas anteriores.
+OBJETIVO: Aprender a usar RunnableWithMessageHistory para gerenciar
+         conversas persistentes automaticamente.
 
-TEMPO: 12 minutos
+TEMPO: 15 minutos
 
 O QUE VOCÊ VAI APRENDER:
-- Por que agentes precisam de memória
-- Como usar o histórico de mensagens built-in do LangChain 1.0+
-- Diferença entre agente com/sem memory
-- Como manter contexto entre chamadas
+- O que é RunnableWithMessageHistory
+- Como criar um chat store para guardar mensagens
+- Diferença entre sessões de conversa
+- Como usar session_id para múltiplas conversas
 
 CONTEXTO:
-Até agora, cada pergunta ao agente é independente. Ele NÃO lembra
-do que foi dito antes. Isso torna conversas não-naturais.
+Até agora, passamos o histórico manualmente. Mas o LangChain tem uma
+forma mais elegante: RunnableWithMessageHistory.
 
-Exemplo SEM memory:
-  Você: "Analise o calculator.py"
-  Agente: "Ok, analisado!"
-  Você: "Quantas funções ele tem?"
-  Agente: "Quem é 'ele'? Qual arquivo?" ❌
-
-Com memory, o agente vai LEMBRAR!
-
-IMPORTANTE: Na API LangChain 1.0+, o agente mantém memória automaticamente
-através do histórico de mensagens. Você só precisa passar o histórico anterior!
+Ele gerencia automaticamente:
+- Salvar mensagens de cada conversa
+- Recuperar histórico por session_id
+- Manter múltiplas conversas separadas
 """
 
 # I AM NOT DONE
 
-from langchain.agents import create_agent
-from langchain_core.tools import tool
+from langchain_core.chat_history import InMemoryChatMessageHistory
+from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_openai import ChatOpenAI
-
-# Importar tools dos exercícios anteriores
-from .ex02_first_tool import list_python_files
-from .ex02_multiple_tools import read_file, count_lines
+from langchain_core.messages import HumanMessage
 
 # ============================================================================
-# Tool simples para este exercício (já implementada)
+# TODO 1: Criar o store para guardar históricos
 # ============================================================================
 
-@tool
-def get_file_info(file_path: str) -> str:
-    """Retorna informações básicas sobre um arquivo Python.
-
-    Use quando precisar de um resumo rápido do arquivo.
-    """
-    try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            lines = f.readlines()
-
-        total = len(lines)
-        functions = sum(1 for line in lines if line.strip().startswith('def '))
-        classes = sum(1 for line in lines if line.strip().startswith('class '))
-
-        return f"""Informações de '{file_path}':
-- Total de linhas: {total}
-- Funções: {functions}
-- Classes: {classes}"""
-    except Exception as e:
-        return f"Erro: {str(e)}"
+# Dictionary que armazena histórico de cada sessão
+# Chave: session_id (string)
+# Valor: InMemoryChatMessageHistory (objeto que guarda mensagens)
+store = {}
 
 
-# ============================================================================
-# TODO 1: Criar agente com tools
-# ============================================================================
+def get_session_history(session_id: str) -> InMemoryChatMessageHistory:
+    """Retorna ou cria histórico para uma sessão.
 
-def create_agent_with_tools():
-    """Cria agente com tools usando LangChain 1.0+ API.
-
-    Na API 1.0+, o agente automaticamente mantém memória através do histórico
-    de mensagens. Não precisa configurar memory separadamente!
-    """
-
-    # TODO 1.1: Criar LLM
-    llm = None  # TODO: ChatOpenAI(model="gpt-5-nano", temperature=0)
-
-    # TODO 1.2: Criar lista de tools
-    tools = []  # TODO: [list_python_files, read_file, count_lines, get_file_info]
-
-    # TODO 1.3: Criar agente
-    # O agente já suporta memória automaticamente!
-    agent = None  # TODO: create_agent(llm, tools)
-
-    return agent
-
-
-# ============================================================================
-# Função auxiliar para demonstrar memória
-# ============================================================================
-
-def chat_with_memory(agent, messages_history):
-    """
-    Envia uma mensagem ao agente mantendo o histórico.
+    Esta função é chamada automaticamente pelo RunnableWithMessageHistory
+    sempre que precisa acessar o histórico de uma conversa.
 
     Args:
-        agent: O agente criado
-        messages_history: Lista de mensagens anteriores
+        session_id: ID único da sessão/conversa
 
     Returns:
-        Histórico atualizado com a nova resposta
+        InMemoryChatMessageHistory com as mensagens da sessão
     """
-    # Invoca o agente com o histórico completo
-    result = agent.invoke({"messages": messages_history})
+    # TODO 1.1: Verificar se session_id já existe no store
+    # Se não existir, criar novo InMemoryChatMessageHistory()
+    # Retornar o histórico
 
-    # Retorna as mensagens atualizadas (incluindo a nova resposta)
-    return result["messages"]
+    if session_id not in store:
+        store[session_id] = None  # TODO: InMemoryChatMessageHistory()
+
+    return store[session_id]
 
 
 # ============================================================================
-# Testes de Comparação (NÃO MODIFIQUE)
+# TODO 2: Criar chat com histórico automático
 # ============================================================================
 
-def test_without_memory():
-    """Demonstra limitações SEM memory (chamadas independentes)."""
-    print("TESTE 1: CHAMADAS INDEPENDENTES (SEM HISTÓRICO)")
+def create_chat_with_history():
+    """Cria um chat que gerencia histórico automaticamente.
+
+    Returns:
+        RunnableWithMessageHistory configurado
+    """
+    # TODO 2.1: Criar o LLM base
+    llm = None  # TODO: ChatOpenAI(model="gpt-4o-mini", temperature=0)
+
+    # TODO 2.2: Envolver o LLM com RunnableWithMessageHistory
+    # Isso adiciona gerenciamento automático de histórico
+    chat_with_history = None  # TODO: Criar RunnableWithMessageHistory
+
+    # DICA: RunnableWithMessageHistory(
+    #     runnable=llm,
+    #     get_session_history=get_session_history,
+    #     input_messages_key="input",
+    #     history_messages_key="chat_history",
+    # )
+
+    return chat_with_history
+
+
+# ============================================================================
+# TODO 3: Usar o chat em diferentes sessões
+# ============================================================================
+
+def chat(chat_with_history, session_id: str, message: str) -> str:
+    """Envia mensagem para o chat com histórico.
+
+    Args:
+        chat_with_history: Chat configurado com RunnableWithMessageHistory
+        session_id: ID da sessão (cada conversa tem seu próprio ID)
+        message: Mensagem do usuário
+
+    Returns:
+        Resposta do assistente
+    """
+    # TODO 3.1: Invocar o chat passando:
+    # - input: a mensagem do usuário
+    # - config: {"configurable": {"session_id": session_id}}
+
+    response = None  # TODO: Implementar invoke
+
+    # DICA: result = chat_with_history.invoke(
+    #     {"input": message},
+    #     config={"configurable": {"session_id": session_id}}
+    # )
+
+    return response.content if response else ""
+
+
+def show_session_history(session_id: str):
+    """Mostra o histórico completo de uma sessão.
+
+    Args:
+        session_id: ID da sessão para visualizar
+    """
+    if session_id not in store:
+        print(f"  Sessão '{session_id}' não existe ainda")
+        return
+
+    history = store[session_id]
+    messages = history.messages
+
+    print(f"\n  📜 Histórico da sessão '{session_id}' ({len(messages)} mensagens):")
+    print("  " + "-" * 60)
+
+    for msg in messages:
+        role = "👤 Usuário" if msg.type == "human" else "🤖 Assistente"
+        content = msg.content[:100] + "..." if len(msg.content) > 100 else msg.content
+        print(f"  {role}: {content}")
+
+
+# ============================================================================
+# Teste local (use para testar seu código)
+# Use o comando `run` para executar o teste
+# ============================================================================
+
+def test_single_session():
+    print("\n" + "=" * 70)
+    print("🧪 TESTE 1: CONVERSA EM UMA ÚNICA SESSÃO")
     print("=" * 70)
 
-    agent = create_agent_with_tools()
+    chat_with_history = create_chat_with_history()
+    session_id = "user_123"
 
-    print("\nConversa 1: Analisar arquivo")
+    print(f"\n👤 Sessão: {session_id}")
     print("-" * 70)
-    # Cada invoke é independente - sem histórico
-    r1 = agent.invoke({
-        "messages": [{"role": "user", "content": "Analise o arquivo ./sample_project/calculator.py"}]
-    })
-    print(f"Resposta: {r1['messages'][-1].content}\n")
 
-    print("Conversa 2: Pergunta sobre conversa anterior (SEM histórico)")
-    print("-" * 70)
-    # Nova chamada SEM passar o histórico anterior
-    r2 = agent.invoke({
-        "messages": [{"role": "user", "content": "Quantas funções ele tem?"}]
-    })
-    print(f"Resposta: {r2['messages'][-1].content}")
-    print("⚠️ Agente NÃO sabe sobre qual arquivo você está falando!\n")
+    # Primeira mensagem
+    print("\n👤 Usuário: Meu nome é João e eu gosto de Python")
+    response1 = chat(chat_with_history, session_id, "Meu nome é João e eu gosto de Python")
+    print(f"🤖 Assistente: {response1}\n")
+
+    # Segunda mensagem - deve lembrar do nome
+    print("👤 Usuário: Qual é meu nome?")
+    response2 = chat(chat_with_history, session_id, "Qual é meu nome?")
+    print(f"🤖 Assistente: {response2}\n")
+
+    # Terceira mensagem - deve lembrar da linguagem
+    print("👤 Usuário: Qual linguagem eu gosto?")
+    response3 = chat(chat_with_history, session_id, "Qual linguagem eu gosto?")
+    print(f"🤖 Assistente: {response3}\n")
+
+    # Mostrar histórico
+    show_session_history(session_id)
     print("=" * 70)
 
 
-def test_with_memory():
-    """Demonstra vantagens COM memory (mantendo histórico)."""
-    print("\n\n🟢 TESTE 2: MANTENDO HISTÓRICO (COM MEMÓRIA)")
+def test_multiple_sessions():
+    """Testa múltiplas sessões independentes."""
+    print("\n\n" + "=" * 70)
+    print("🧪 TESTE 2: MÚLTIPLAS SESSÕES INDEPENDENTES")
     print("=" * 70)
 
-    agent = create_agent_with_tools()
+    chat_with_history = create_chat_with_history()
 
-    # Inicia o histórico de mensagens
-    messages = []
-
-    print("\nConversa 1: Analisar arquivo")
+    # Sessão 1
+    print("\n👤 Sessão: user_alice")
     print("-" * 70)
-    # Adiciona primeira pergunta
-    messages.append({"role": "user", "content": "Analise o arquivo ./sample_project/calculator.py"})
+    print("👤 Alice: Meu nome é Alice e eu moro em São Paulo")
+    r1 = chat(chat_with_history, "user_alice", "Meu nome é Alice e eu moro em São Paulo")
+    print(f"🤖 Assistente: {r1}\n")
 
-    # Invoca e atualiza histórico
-    messages = chat_with_memory(agent, messages)
-    print(f"Resposta: {messages[-1].content}\n")
-
-    print("Conversa 2: Pergunta sobre conversa anterior (COM histórico)")
+    # Sessão 2
+    print("\n👤 Sessão: user_bob")
     print("-" * 70)
-    # Adiciona segunda pergunta ao histórico existente
-    messages.append({"role": "user", "content": "Quantas funções ele tem?"})
+    print("👤 Bob: Meu nome é Bob e eu moro no Rio")
+    r2 = chat(chat_with_history, "user_bob", "Meu nome é Bob e eu moro no Rio")
+    print(f"🤖 Assistente: {r2}\n")
 
-    # Invoca com histórico completo
-    messages = chat_with_memory(agent, messages)
-    print(f"Resposta: {messages[-1].content}\n")
-
-    print("Conversa 3: Outra pergunta contextual")
+    # Voltar para sessão 1 - deve lembrar de Alice
+    print("\n👤 Sessão: user_alice (voltando)")
     print("-" * 70)
-    messages.append({"role": "user", "content": "E classes, tinha alguma?"})
+    print("👤 Alice: Onde eu moro?")
+    r3 = chat(chat_with_history, "user_alice", "Onde eu moro?")
+    print(f"🤖 Assistente: {r3}\n")
 
-    messages = chat_with_memory(agent, messages)
-    print(f"Resposta: {messages[-1].content}\n")
+    print("\n👤 Sessão: user_bob (voltando)")
+    print("-" * 70)
+    print("👤 Bob: Qual é meu nome?")
+    r4 = chat(chat_with_history, "user_bob", "Qual é meu nome?")
+    print(f"🤖 Assistente: {r4}\n")
+
+    show_session_history("user_alice")
+    show_session_history("user_bob")
     print("=" * 70)
 
 
 def test_memory():
     try:
-        test_without_memory()
-        test_with_memory()
-
-        print("\n📝 RESUMO:")
-        print("=" * 70)
-        print("SEM MEMÓRIA: Cada invoke() é independente")
-        print("COM MEMÓRIA: Passe o histórico de messages em cada invoke()")
-        print("=" * 70)
-
+        test_single_session()
+        test_multiple_sessions()
     except Exception as e:
-        print(f"❌ Erro: {e}")
+        print(f"\n❌ Erro: {e}")
         import traceback
         traceback.print_exc()
 
