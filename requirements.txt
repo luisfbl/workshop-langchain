@@ -6,7 +6,7 @@ langgraph
 openai
 
 requests
-Pyrebase4
+git+https://github.com/nhorvath/Pyrebase4.git@main
 
 pytest
 pytest-asyncio
@@ -27,3 +27,5 @@ requests
 
 isort
 pyright
+setuptools
+wheel
