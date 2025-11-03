@@ -109,3 +109,32 @@ class ExerciseManager:
                     exercises.append(exercise_file.name)
 
         return exercises
+
+    def restore_solution(self, exercise_num: int, code: str, day: int, file_name: str) -> bool:
+        """
+        Restaura uma solução salva para o arquivo do exercício
+
+        Args:
+            exercise_num: Número do exercício
+            code: Código da solução
+            day: Dia do exercício (1 ou 2)
+            file_name: Nome do arquivo (sem extensão)
+
+        Returns:
+            True se sucesso, False se erro
+        """
+        try:
+            target_day = self.exercises_dir / f"day{day}"
+            target_file = target_day / f"{file_name}.py"
+
+            if not target_day.exists():
+                print(f"Erro: Diretório day{day} não existe")
+                return False
+
+            # Salva a solução no arquivo
+            target_file.write_text(code, encoding='utf-8')
+            return True
+
+        except Exception as e:
+            print(f"Erro ao restaurar solução: {e}")
+            return False

@@ -136,6 +136,7 @@ class WorkshopSession:
             "run": self._cmd_run,
             "r": self._cmd_run,
             "reset": self._cmd_reset,
+            "restore": self._cmd_restore,
             "next": self._cmd_next,
             "prev": self._cmd_prev,
             "quit": self._cmd_quit,
@@ -165,6 +166,7 @@ class WorkshopSession:
   test <num>       - Roda testes de um exercício específico (força execução)
   run, r <num>     - Executa o arquivo do exercício (sem rodar testes)
   reset <num>      - Reseta exercício para estado original
+  restore [num]    - Restaura soluções salvas do Firebase (⚠️ apaga código atual!)
   next             - Vai para próximo exercício (se atual completo)
   prev             - Volta para exercício anterior (apenas visualizar)
 
@@ -225,6 +227,125 @@ class WorkshopSession:
     def _cmd_reset(self, args):
         """Reseta exercício"""
         console.print("[yellow]⚠️  Função de reset ainda não implementada[/yellow]")
+
+    def _cmd_restore(self, args):
+        """Restaura soluções salvas do Firebase"""
+        from rich.prompt import Confirm
+
+        # Determina quais exercícios restaurar
+        if args:
+            try:
+                ex_num = int(args[0])
+                if not (1 <= ex_num <= 8):
+                    console.print("[red]❌ Número de exercício inválido (1-8)[/red]")
+                    return
+                exercises_to_restore = [ex_num]
+            except ValueError:
+                console.print("[red]❌ Use: restore [número] (sem número restaura todos completos)[/red]")
+                return
+        else:
+            # Restaura todos os exercícios completos
+            progress = self.progress.get_progress()
+            completed = progress.get("completed_exercises", [])
+            if not completed:
+                console.print("[yellow]⚠️  Você ainda não completou nenhum exercício.[/yellow]")
+                console.print("[dim]Não há soluções salvas para restaurar.[/dim]")
+                return
+            exercises_to_restore = completed
+
+        # Aviso e confirmação
+        console.print("\n[bold red]⚠️  ATENÇÃO: OPERAÇÃO DESTRUTIVA ⚠️[/bold red]\n")
+        console.print("[yellow]Esta operação irá:[/yellow]")
+        console.print("  • [red]APAGAR[/red] todo o código atual dos exercícios selecionados")
+        console.print("  • Substituir pelos códigos salvos no Firebase (suas soluções anteriores)")
+        console.print("  • [bold]Não há como desfazer esta operação[/bold]\n")
+
+        if len(exercises_to_restore) == 1:
+            ex_num = exercises_to_restore[0]
+            try:
+                ex_info = self.progress.get_exercise_info(ex_num)
+                ex_name = ex_info["name"]
+            except KeyError:
+                ex_name = f"Exercício {ex_num}"
+            console.print(f"[cyan]Será restaurado: {ex_name} (#{ex_num})[/cyan]\n")
+        else:
+            console.print(f"[cyan]Serão restaurados {len(exercises_to_restore)} exercícios:[/cyan]")
+            for ex_num in sorted(exercises_to_restore):
+                try:
+                    ex_info = self.progress.get_exercise_info(ex_num)
+                    ex_name = ex_info["name"]
+                    console.print(f"  • #{ex_num} - {ex_name}")
+                except KeyError:
+                    console.print(f"  • #{ex_num}")
+            console.print()
+
+        confirmed = Confirm.ask(
+            "[bold]Você tem certeza que deseja continuar?[/bold]",
+            default=False
+        )
+
+        if not confirmed:
+            console.print("[cyan]Operação cancelada.[/cyan]")
+            return
+
+        # Restaura exercícios
+        console.print("\n[yellow]🔄 Restaurando soluções...[/yellow]\n")
+
+        restored_count = 0
+        not_found_count = 0
+        error_count = 0
+
+        for ex_num in sorted(exercises_to_restore):
+            try:
+                # Busca solução salva
+                solution_code = self.firebase.get_exercise_solution(self.user_id, ex_num)
+
+                if solution_code is None:
+                    try:
+                        ex_info = self.progress.get_exercise_info(ex_num)
+                        ex_name = ex_info["name"]
+                    except KeyError:
+                        ex_name = f"Exercício {ex_num}"
+                    console.print(f"[yellow]⚠️  Solução não encontrada: {ex_name} (#{ex_num})[/yellow]")
+                    not_found_count += 1
+                    continue
+
+                # Obtém informações do exercício
+                try:
+                    ex_info = self.progress.get_exercise_info(ex_num)
+                except KeyError:
+                    console.print(f"[red]❌ Exercício {ex_num} não está configurado[/red]")
+                    error_count += 1
+                    continue
+
+                # Restaura usando ExerciseManager
+                success = self.exercise_manager.restore_solution(
+                    exercise_num=ex_num,
+                    code=solution_code,
+                    day=ex_info["day"],
+                    file_name=ex_info["file"]
+                )
+
+                if success:
+                    ex_name = ex_info["name"]
+                    console.print(f"[green]✅ Restaurado: {ex_name} (#{ex_num})[/green]")
+                    restored_count += 1
+                else:
+                    console.print(f"[red]❌ Erro ao restaurar exercício {ex_num}[/red]")
+                    error_count += 1
+
+            except Exception as e:
+                console.print(f"[red]❌ Erro ao processar exercício {ex_num}: {e}[/red]")
+                error_count += 1
+
+        # Resumo
+        console.print(f"\n[bold cyan]Resumo da Restauração:[/bold cyan]")
+        console.print(f"  • Restaurados: [green]{restored_count}[/green]")
+        if not_found_count > 0:
+            console.print(f"  • Não encontrados: [yellow]{not_found_count}[/yellow]")
+        if error_count > 0:
+            console.print(f"  • Erros: [red]{error_count}[/red]")
+        console.print()
 
     def _cmd_next(self, args):
         """Vai para próximo exercício"""
@@ -457,6 +578,19 @@ class WorkshopSession:
 
                 self.progress.save_test_result(exercise_num, True)
                 self.rate_limiter.increment_usage(exercise_num)
+
+                # Salva a solução no Firebase
+                try:
+                    ex_info = self.progress.get_exercise_info(exercise_num)
+                    day_dir = self.exercises_dir / f"day{ex_info['day']}"
+                    exercise_path = day_dir / f"{ex_info['file']}.py"
+                    
+                    if exercise_path.exists():
+                        solution_code = exercise_path.read_text(encoding='utf-8')
+                        self.firebase.save_exercise_solution(self.user_id, exercise_num, solution_code)
+                        console.print("[dim]💾 Solução salva no Firebase[/dim]")
+                except Exception as e:
+                    console.print(f"[yellow]⚠️  Aviso: Não foi possível salvar a solução: {e}[/yellow]")
             else:
                 console.print(f"[bold red]❌ TESTES FALHARAM ({elapsed:.1f}s)[/bold red]\n")
                 console.print("[dim]Saída dos testes:[/dim]")

@@ -266,35 +266,71 @@ class FirebaseClient:
 
             progress = self.db.child("progress").child(user_id).get()
 
-            if progress.val() is not None:
+            # Garante que temos dados válidos
+            if progress.val() is None:
+                # Inicializa progresso se não existe
+                self._initialize_progress(user_id)
+                progress = self.db.child("progress").child(user_id).get()
+
+            data = progress.val()
+            
+            # Garante que data é um dict, não uma lista
+            if not isinstance(data, dict):
+                print(f"Erro: progress.val() retornou tipo inesperado: {type(data)}")
+                print(f"Valor: {data}")
+                # Tenta criar estrutura correta
+                self._initialize_progress(user_id)
+                progress = self.db.child("progress").child(user_id).get()
                 data = progress.val()
-                # Garante que data é um dict, não uma lista
                 if not isinstance(data, dict):
-                    print(f"Aviso: progress.val() retornou tipo inesperado: {type(data)}")
+                    print("Erro crítico: não foi possível criar estrutura válida")
                     return
-                solutions = data.get("solutions", {})
-                key = str(exercise_num)
 
-                solutions[key] = {
-                    "code": compressed_b64,
-                    "saved_at": datetime.now().isoformat(),
-                    "size": len(code),
+            solutions = data.get("solutions", {})
+            # Garante que solutions é um dict
+            if not isinstance(solutions, dict):
+                print(f"DEBUG SAVE: solutions não é dict, é {type(solutions)}, valor: {solutions}")
+                # Se é lista, converte para dict
+                if isinstance(solutions, list):
+                    new_solutions = {}
+                    for i, sol in enumerate(solutions):
+                        if sol is not None:
+                            new_solutions[f"ex{i}"] = sol
+                    solutions = new_solutions
+                else:
+                    solutions = {}
+                
+            # Usa prefixo "ex" para evitar conversão para array pelo Firebase
+            key = f"ex{exercise_num}"
+            
+            print(f"DEBUG SAVE: Antes de salvar - solutions keys: {list(solutions.keys())}")
+
+            solutions[key] = {
+                "code": compressed_b64,
+                "saved_at": datetime.now().isoformat(),
+                "size": len(code),
+            }
+            
+            print(f"DEBUG SAVE: Depois de adicionar - solutions keys: {list(solutions.keys())}")
+
+            self.db.child("progress").child(user_id).update(
+                {
+                    "solutions": solutions,
+                    "last_activity": datetime.now().isoformat(),
                 }
-
-                self.db.child("progress").child(user_id).update(
-                    {
-                        "solutions": solutions,
-                        "last_activity": datetime.now().isoformat(),
-                    }
-                )
+            )
+            print(f"DEBUG: Solução salva - user_id={user_id}, exercise_num={exercise_num}, key={key}, tamanho={len(code)} chars")
         except Exception as e:
             print(f"Erro ao salvar solução: {e}")
+            import traceback
+            traceback.print_exc()
 
     def get_exercise_solution(self, user_id: str, exercise_num: int) -> str | None:
         try:
             progress = self.db.child("progress").child(user_id).get()
 
             if progress.val() is None:
+                print(f"DEBUG: progress.val() é None para user_id={user_id}")
                 return None
 
             data = progress.val()
@@ -302,10 +338,28 @@ class FirebaseClient:
             if not isinstance(data, dict):
                 print(f"Aviso: progress.val() retornou tipo inesperado: {type(data)}")
                 return None
+            
             solutions = data.get("solutions", {})
-            key = str(exercise_num)
+            print(f"DEBUG: solutions type: {type(solutions)}")
+            print(f"DEBUG: solutions value: {solutions}")
+            
+            # Se é lista (Firebase converteu), converte para dict
+            if isinstance(solutions, list):
+                print(f"DEBUG: Convertendo lista para dict")
+                new_solutions = {}
+                for i, sol in enumerate(solutions):
+                    if sol is not None:
+                        new_solutions[f"ex{i}"] = sol
+                solutions = new_solutions
+            
+            print(f"DEBUG: solutions encontradas: {list(solutions.keys()) if isinstance(solutions, dict) else 'não é dict'}")
+            
+            # Usa prefixo "ex" para evitar conversão para array pelo Firebase
+            key = f"ex{exercise_num}"
+            print(f"DEBUG: procurando key '{key}' em solutions")
 
             if key not in solutions:
+                print(f"DEBUG: key '{key}' não encontrada em solutions")
                 return None
 
             import base64
