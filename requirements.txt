@@ -6,7 +6,7 @@ langgraph
 openai
 
 requests
-git+https://github.com/nhorvath/Pyrebase4.git@main
+git+https://github.com/nhorvath/Pyrebase4.git@master
 
 pytest
 pytest-asyncio
