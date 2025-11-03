@@ -20,9 +20,9 @@ O agente vai DECIDIR quando usar essa ferramenta.
 # I AM NOT DONE
 
 from pathlib import Path
-from langchain.agents import create_react_agent, AgentExecutor, tool
+from langchain.agents import create_agent
+from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
-from langchain import hub
 
 # ============================================================================
 # TODO 1: Criar a tool de listagem de arquivos
@@ -59,25 +59,20 @@ def list_python_files(directory: str) -> str:
 # ============================================================================
 
 def create_agent_with_tool():
-    """Cria agente com a tool list_python_files."""
+    """Cria agente com a tool list_python_files usando LangChain 1.0+ API."""
 
     # TODO 2.1: Criar LLM
-    llm = None  # TODO: ChatOpenAI(model="gpt-4o-mini", temperature=0)
+    llm = None  # TODO: ChatOpenAI(model="gpt-5-nano", temperature=0)
 
-    # TODO 2.2: Buscar prompt
-    prompt = None  # TODO: hub.pull("hwchase17/react")
-
-    # TODO 2.3: Criar lista de tools COM list_python_files
+    # TODO 2.2: Criar lista de tools COM list_python_files
     # IMPORTANTE: Agora a lista NÃO está vazia!
     tools = []  # TODO: [list_python_files]
 
-    # TODO 2.4: Criar agente
-    agent = None  # TODO: create_react_agent(...)
+    # TODO 2.3: Criar agente usando create_agent
+    # DICA: Na API 1.0+, create_agent(llm, tools) retorna um CompiledStateGraph
+    agent = None  # TODO: create_agent(llm, tools)
 
-    # TODO 2.5: Criar executor
-    agent_executor = None  # TODO: AgentExecutor(..., verbose=True)
-
-    return agent_executor
+    return agent
 
 
 # ============================================================================
@@ -94,18 +89,24 @@ def test_agent():
         print("=" * 60)
         print("TESTE 1: Pedir para listar arquivos (deve usar a tool)")
         print("=" * 60)
+
+        # API 1.0+ usa messages
         response = agent.invoke({
-            "input": "Liste todos os arquivos Python no diretório ./sample_project"
+            "messages": [{"role": "user", "content": "Liste todos os arquivos Python no diretório ./sample_project"}]
         })
-        print(f"\nResposta: {response['output']}\n")
+
+        last_message = response['messages'][-1]
+        print(f"\nResposta: {last_message.content}\n")
 
         print("=" * 60)
         print("TESTE 2: Pergunta geral (NÃO deve usar a tool)")
         print("=" * 60)
         response = agent.invoke({
-            "input": "O que é Python?"
+            "messages": [{"role": "user", "content": "O que é Python?"}]
         })
-        print(f"\nResposta: {response['output']}\n")
+
+        last_message = response['messages'][-1]
+        print(f"\nResposta: {last_message.content}\n")
 
     except Exception as e:
         print(f"❌ Erro: {e}")

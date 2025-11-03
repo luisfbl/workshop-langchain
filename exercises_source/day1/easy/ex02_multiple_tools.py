@@ -23,12 +23,12 @@ O agente vai DECIDIR qual tool usar baseado na pergunta do usuário.
 # I AM NOT DONE
 
 from pathlib import Path
-from langchain.agents import create_react_agent, AgentExecutor, tool
+from langchain.agents import create_agent
+from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
-from langchain import hub
 
 # Importar a tool do exercício anterior
-from ex02_first_tool import list_python_files
+from .ex02_first_tool import list_python_files
 
 # ============================================================================
 # TODO 1: Criar tool para ler arquivo
@@ -114,22 +114,16 @@ def create_multi_tool_agent():
     """Cria agente com 3 tools: list_python_files, read_file, count_lines."""
 
     # TODO 3.1: Criar LLM
-    llm = None  # TODO: ChatOpenAI(model="gpt-4o-mini", temperature=0)
+    llm = None  # TODO: ChatOpenAI(model="gpt-5-nano", temperature=0)
 
-    # TODO 3.2: Buscar prompt
-    prompt = None  # TODO: hub.pull("hwchase17/react")
-
-    # TODO 3.3: Criar lista de tools com as 3 ferramentas
+    # TODO 3.2: Criar lista de tools com as 3 ferramentas
     # IMPORTANTE: Agora temos 3 tools!
     tools = []  # TODO: [list_python_files, read_file, count_lines]
 
-    # TODO 3.4: Criar agente
-    agent = None  # TODO: create_react_agent(llm, tools, prompt)
+    # TODO 3.3: Criar agente usando create_agent
+    agent = None  # TODO: create_agent(llm, tools)
 
-    # TODO 3.5: Criar executor
-    agent_executor = None  # TODO: AgentExecutor(..., verbose=True)
-
-    return agent_executor
+    return agent
 
 
 # ============================================================================
@@ -172,9 +166,13 @@ def test_agent():
             print(f"Expectativa: {test['description']}")
             print("=" * 70)
 
-            response = agent.invoke({"input": test['query']})
+            # API 1.0+ usa messages
+            response = agent.invoke({
+                "messages": [{"role": "user", "content": test['query']}]
+            })
 
-            print(f"\nResposta: {response['output']}\n")
+            last_message = response['messages'][-1]
+            print(f"\nResposta: {last_message.content}\n")
 
     except Exception as e:
         print(f"❌ Erro: {e}")

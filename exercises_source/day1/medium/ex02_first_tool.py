@@ -20,9 +20,9 @@ Foque em fazer uma tool robusta que lida com erros.
 # I AM NOT DONE
 
 from pathlib import Path
-from langchain.agents import create_react_agent, AgentExecutor, tool
+from langchain.agents import create_agent
+from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
-from langchain import hub
 
 # ============================================================================
 # TODO 1: Criar tool robusta de listagem

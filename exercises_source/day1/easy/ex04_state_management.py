@@ -32,7 +32,7 @@ from pathlib import Path
 import ast
 
 # Importar tools dos exercicios anteriores
-from ex02_first_tool import list_python_files
+from .ex02_first_tool import list_python_files
 
 # ============================================================================
 # TODO 1: Definir o State com TypedDict

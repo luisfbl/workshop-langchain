@@ -13,11 +13,11 @@ O QUE VOCÊ VAI APRENDER:
 - Validação automática de dados
 
 CONTEXTO:
-Até agora o agente retorna texto livre. Para o pipeline do Dia 2,
+Até agora o agente retorna texto livre. Para workflows avançados,
 precisamos de DADOS ESTRUTURADOS (JSON) que outras partes do sistema
 possam processar facilmente.
 
-IMPORTANTE: Este é o ÚLTIMO exercício do Dia 1!
+IMPORTANTE: Este é o ÚLTIMO exercício básico de agentes!
 """
 
 # I AM NOT DONE
@@ -25,10 +25,8 @@ IMPORTANTE: Este é o ÚLTIMO exercício do Dia 1!
 from pathlib import Path
 from typing import List, Optional
 from pydantic import BaseModel, Field
-from langchain.agents import create_react_agent, AgentExecutor, tool
+from langchain.agents import create_agent, tool
 from langchain_openai import ChatOpenAI
-from langchain.memory import ConversationBufferMemory
-from langchain import hub
 import ast
 import json
 
@@ -122,27 +120,18 @@ def analyze_file_structured(file_path: str) -> str:
 # ============================================================================
 
 def create_structured_agent():
-    """Cria agente com tool de análise estruturada."""
+    """Cria agente com tool de análise estruturada usando LangChain 1.0+."""
 
     # TODO 2.1: Criar LLM
-    llm = None  # TODO: ChatOpenAI(...)
+    llm = None  # TODO: ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
-    # TODO 2.2: Criar memory (opcional, mas recomendado)
-    memory = None  # TODO: ConversationBufferMemory(...)
-
-    # TODO 2.3: Buscar prompt
-    prompt = None  # TODO: hub.pull("hwchase17/react")
-
-    # TODO 2.4: Lista de tools
+    # TODO 2.2: Lista de tools
     tools = []  # TODO: [analyze_file_structured]
 
-    # TODO 2.5: Criar agente
-    agent = None  # TODO: create_react_agent(...)
+    # TODO 2.3: Criar agente usando create_agent
+    agent = None  # TODO: create_agent(llm, tools)
 
-    # TODO 2.6: Criar executor
-    agent_executor = None  # TODO: AgentExecutor(...)
-
-    return agent_executor
+    return agent
 
 
 # ============================================================================
@@ -154,22 +143,32 @@ def test_structured_output():
     try:
         agent = create_structured_agent()
 
+        # Histórico de mensagens para manter contexto
+        messages = []
+
         print("=" * 70)
         print("TESTE 1: Análise estruturada")
         print("=" * 70)
-        response = agent.invoke({
-            "input": "Analise o arquivo ./sample_project/calculator.py de forma estruturada"
+
+        # Primeira pergunta
+        messages.append({
+            "role": "user",
+            "content": "Analise o arquivo ./sample_project/calculator.py de forma estruturada"
         })
 
+        response = agent.invoke({"messages": messages})
+        messages = response['messages']  # Atualiza histórico
+
+        last_msg = messages[-1].content
         print("\nResposta:")
-        print(response['output'])
+        print(last_msg)
 
         print("\n" + "=" * 70)
         print("VALIDAÇÃO: Tentando parsear como JSON...")
         print("=" * 70)
 
         try:
-            output = response['output']
+            output = last_msg
 
             start = output.find('{')
             end = output.rfind('}') + 1
@@ -196,12 +195,19 @@ def test_structured_output():
             print(f"❌ JSON INVÁLIDO: {e}")
 
         print("\n" + "=" * 70)
-        print("TESTE 2: Pergunta sobre dados estruturados (com memory)")
+        print("TESTE 2: Pergunta sobre dados estruturados (com histórico)")
         print("=" * 70)
-        response2 = agent.invoke({
-            "input": "Quais funções não têm docstring?"
+
+        # Segunda pergunta com contexto
+        messages.append({
+            "role": "user",
+            "content": "Quais funções não têm docstring?"
         })
-        print(f"\nResposta: {response2['output']}")
+
+        response2 = agent.invoke({"messages": messages})
+        messages = response2['messages']
+
+        print(f"\nResposta: {messages[-1].content}")
 
     except Exception as e:
         print(f"❌ Erro: {e}")

@@ -33,7 +33,7 @@ from pathlib import Path
 import ast
 from pydantic import BaseModel, Field
 from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph import StateGraph, END
 
 # ============================================================================
@@ -181,7 +181,7 @@ Formato: Markdown""")
     ])
 
     # TODO 2.7: Chamar LLM
-    llm = None  # TODO: ChatOpenAI(model="gpt-4o-mini", temperature=0.7)
+    llm = None  # TODO: ChatOpenAI(model="gpt-5-nano", temperature=0.7)
     chain = None  # TODO: prompt | llm
 
     try:

@@ -394,4 +394,4 @@ def test_quality_pipeline():
 
 
 if __name__ == "__main__":
-    test_quality_pipeline()
+    _ = test_quality_pipeline()

@@ -19,14 +19,13 @@ Vamos explorar como funciona e quando usar.
 
 # I AM NOT DONE
 
-from langchain.agents import create_react_agent, AgentExecutor, tool
+from langchain.agents import create_agent
+from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
-from langchain.memory import ConversationBufferMemory
-from langchain import hub
 
 # Importar tools
-from ex02_first_tool import list_python_files
-from ex03_multiple_tools import read_file, count_lines
+from .ex02_first_tool import list_python_files
+from .ex02_multiple_tools import read_file, count_lines
 
 # ============================================================================
 # Tool para demonstração (já implementada)
@@ -115,15 +114,13 @@ def list_analyzed_files() -> str:
 # ============================================================================
 
 def test_memory():
-    """Testa agentes com e sem memory."""
     try:
-        # Cenário de teste
         conversation = [
             "Analise o arquivo ./sample_project/calculator.py",
-            "Quantas funções ele tem?",  # Precisa lembrar do arquivo
-            "Tem classes também?",       # Precisa lembrar do arquivo
+            "Quantas funções ele tem?",
+            "Tem classes também?",
             "Agora analise o utils.py",
-            "Qual dos dois arquivos tem mais funções?"  # Lembrar dos DOIS!
+            "Qual dos dois arquivos tem mais funções?"
         ]
 
         print("=" * 70)

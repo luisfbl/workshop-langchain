@@ -36,11 +36,11 @@ WORKFLOW DESTE EXERCÍCIO:
 
 # I AM NOT DONE
 
-from typing import TypedDict, List, Literal
+from typing import Any, TypedDict, List, Literal
 from pathlib import Path
 import ast
 from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph import StateGraph, END
 
 # ============================================================================
@@ -54,18 +54,18 @@ class OrchestratorState(TypedDict):
     directory: str  # Diretório com arquivos Python
 
     # Lista de arquivos
-    files_to_process: List[str]
-    files_processed: List[str]
+    files_to_process: list[str]
+    files_processed: list[str]
 
     # Arquivo atual
     current_file: str
     current_code: str
 
     # Análise do arquivo atual
-    current_analysis: dict  # {functions: [], classes: [], lines: 0}
+    current_analysis: dict[str, Any]  # {functions: [], classes: [], lines: 0}
 
     # Documentação de cada arquivo
-    all_docs: List[dict]  # [{file: "x.py", doc: "..."}]
+    all_docs: list[dict[str, Any]]  # [{file: "x.py", doc: "..."}]
 
     # Controle de fluxo
     current_step: str
@@ -80,7 +80,7 @@ class OrchestratorState(TypedDict):
 # TODO 2: Nodes do workflow
 # ============================================================================
 
-def list_files_node(state: OrchestratorState) -> dict:
+def list_files_node(state: OrchestratorState) -> dict[str, Any]:
     """Node inicial: Lista arquivos Python do diretório."""
     path = Path(state["directory"])
     # TODO 2.1: Buscar arquivos .py
@@ -94,7 +94,7 @@ def list_files_node(state: OrchestratorState) -> dict:
     }
 
 
-def process_file_node(state: OrchestratorState) -> dict:
+def process_file_node(state: OrchestratorState) -> dict[str, Any]:
     """Node principal: Processa um arquivo (lê, analisa, gera doc)."""
 
     # TODO 2.2: Pegar próximo arquivo
@@ -123,7 +123,7 @@ def process_file_node(state: OrchestratorState) -> dict:
         }
 
         # TODO 2.5: Gerar documentação com LLM
-        llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.7)
+        llm = ChatOpenAI(model="gpt-5-nano", temperature=0.7)
         prompt = ChatPromptTemplate.from_messages([
             ("system", "Gere documentação concisa em markdown."),
             ("human", "Arquivo: {file}\nFunções: {funcs}\nClasses: {classes}\n\nGere doc:")

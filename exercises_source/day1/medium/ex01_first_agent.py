@@ -19,9 +19,8 @@ e o fluxo: LLM → Prompt → Agent → Executor
 
 # I AM NOT DONE
 
-from langchain.agents import create_react_agent, AgentExecutor
+from langchain.agents import create_agent
 from langchain_openai import ChatOpenAI
-from langchain import hub
 
 # ============================================================================
 # TODO 1: Crie função que retorna LLM configurado
@@ -30,7 +29,7 @@ from langchain import hub
 def create_llm():
     """
     TODO: Crie e retorne um ChatOpenAI com:
-    - model: gpt-4o-mini
+    - model: gpt-5-nano
     - temperature: 0
     - Considere adicionar outras configurações se quiser experimentar
     """
@@ -46,12 +45,13 @@ def create_basic_agent():
     TODO: Implemente a criação completa do agente:
 
     1. Criar LLM
-    2. Buscar prompt ReAct do hub (hwchase17/react)
-    3. Criar lista de tools (vazia por enquanto)
-    4. Criar agente com create_react_agent()
-    5. Criar executor com AgentExecutor()
+    2. Criar lista de tools (vazia por enquanto)
+    3. Criar agente com create_agent()
 
-    Retorne: AgentExecutor configurado com verbose=True
+    Retorne: Agente compilado (CompiledStateGraph)
+
+    NOTA: Na API LangChain 1.0+, create_agent() substitui create_react_agent()
+    e não precisa mais de AgentExecutor ou prompt do hub.
     """
     pass
 
@@ -68,9 +68,9 @@ def test_agent():
         print("TESTE: Pergunta que NÃO precisa de tools")
         print("=" * 60)
         response = agent.invoke({
-            "input": "Explique em uma frase o que é um agente de IA"
+            "messages": [{"role": "user", "content": "Explique em uma frase o que é um agente de IA"}]
         })
-        print(f"Resposta: {response['output']}\n")
+        print(f"Resposta: {response['messages'][-1].content}\n")
 
     except Exception as e:
         print(f"❌ Erro: {e}")

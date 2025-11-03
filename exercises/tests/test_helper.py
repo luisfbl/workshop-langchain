@@ -14,35 +14,29 @@ def get_user_level():
 def import_exercise(day: int, exercise_name: str):
     """
     Importa um exercício do nível correto do usuário
-    
+
     Args:
         day: Número do dia (1 ou 2)
         exercise_name: Nome do arquivo do exercício (ex: 'ex01_first_agent')
-    
+
     Returns:
         Módulo importado
+
+    Nota: Os exercícios já estão filtrados por nível na pasta exercises/day{X}/
+          pelo ExerciseManager, então não há subdire subddiretórios easy/medium
     """
-    level = get_user_level()
-    
-    # Constrói o caminho do import
-    module_path = f"exercises.day{day}.{level}.{exercise_name}"
-    
+    # Nova estrutura: exercises.day{X}.{exercise_name}
+    # Os exercícios do nível do usuário já foram copiados para exercises/day{X}/
+    module_path = f"exercises.day{day}.{exercise_name}"
+
     # Tenta importar
     try:
         import importlib
         module = importlib.import_module(module_path)
         return module
     except ImportError as e:
-        # Fallback: tenta o outro nível
-        other_level = "easy" if level == "medium" else "medium"
-        module_path = f"exercises.day{day}.{other_level}.{exercise_name}"
-        
-        try:
-            import importlib
-            module = importlib.import_module(module_path)
-            return module
-        except ImportError:
-            raise ImportError(
-                f"Não foi possível importar {exercise_name} de day{day}. "
-                f"Verifique se o arquivo existe em exercises/day{day}/{level}/"
-            )
+        raise ImportError(
+            f"Não foi possível importar {exercise_name} de day{day}. "
+            f"Verifique se o arquivo existe em exercises/day{day}/\n"
+            f"Erro: {e}"
+        )

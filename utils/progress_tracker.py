@@ -3,7 +3,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from google.cloud.client import Client
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
@@ -15,13 +14,94 @@ from utils.firebase_client import FirebaseClient
 console = Console()
 
 EXERCISES = {
-    1: {"name": "Primeiro Agente", "day": 1, "difficulty": "easy", "estimated_minutes": 20},
-    2: {"name": "Múltiplas Ferramentas", "day": 1, "difficulty": "medium", "estimated_minutes": 25},
-    3: {"name": "Agente com Memória", "day": 1, "difficulty": "medium", "estimated_minutes": 30},
-    4: {"name": "Analisador de Código", "day": 1, "difficulty": "hard", "estimated_minutes": 35},
-    5: {"name": "Saída Estruturada", "day": 2, "difficulty": "medium", "estimated_minutes": 25},
-    6: {"name": "Gerador de Código", "day": 2, "difficulty": "hard", "estimated_minutes": 40},
-    7: {"name": "Orquestrador Multi-Agente", "day": 2, "difficulty": "hard", "estimated_minutes": 45},
+    1: {
+        "name": "Primeiro Agente",
+        "day": 1,
+        "difficulty": "easy",
+        "estimated_minutes": 20,
+        "file": "ex01_first_agent",
+        "variants": {
+            "easy": {"file": "ex01_first_agent", "difficulty": "easy", "estimated_minutes": 15},
+            "medium": {"file": "ex01_first_agent", "difficulty": "medium", "estimated_minutes": 20},
+        },
+    },
+    2: {
+        "name": "Primeira Tool",
+        "day": 1,
+        "difficulty": "easy",
+        "estimated_minutes": 20,
+        "file": "ex02_first_tool",
+        "variants": {
+            "easy": {"file": "ex02_first_tool", "difficulty": "easy", "estimated_minutes": 20},
+            "medium": {"file": "ex02_first_tool", "difficulty": "medium", "estimated_minutes": 20},
+        },
+    },
+    3: {
+        "name": "Múltiplas Tools",
+        "day": 1,
+        "difficulty": "medium",
+        "estimated_minutes": 25,
+        "file": "ex02_multiple_tools",
+        "variants": {
+            "easy": {"file": "ex02_multiple_tools", "difficulty": "easy", "estimated_minutes": 25},
+            "medium": {"file": "ex02_multiple_tools", "difficulty": "medium", "estimated_minutes": 25},
+        },
+    },
+    4: {
+        "name": "Agente com Memória",
+        "day": 1,
+        "difficulty": "medium",
+        "estimated_minutes": 30,
+        "file": "ex03_memory",
+        "variants": {
+            "easy": {"file": "ex03_memory", "difficulty": "easy", "estimated_minutes": 25},
+            "medium": {"file": "ex03_memory", "difficulty": "medium", "estimated_minutes": 30},
+        },
+    },
+    5: {
+        "name": "State Management",
+        "day": 1,
+        "difficulty": "medium",
+        "estimated_minutes": 35,
+        "file": "ex04_state_management",
+        "variants": {
+            "easy": {"file": "ex04_state_management", "difficulty": "medium", "estimated_minutes": 30},
+            "medium": {"file": "ex04_state_management", "difficulty": "hard", "estimated_minutes": 35},
+        },
+    },
+    6: {
+        "name": "Saída Estruturada",
+        "day": 1,
+        "difficulty": "medium",
+        "estimated_minutes": 25,
+        "file": "ex05_structured_output",
+        "variants": {
+            "easy": {"file": "ex05_structured_output", "difficulty": "medium", "estimated_minutes": 25},
+            "medium": {"file": "ex05_structured_output", "difficulty": "medium", "estimated_minutes": 25},
+        },
+    },
+    7: {
+        "name": "LangGraph",
+        "day": 2,
+        "difficulty": "medium",
+        "estimated_minutes": 40,
+        "file": "ex06_langgraph_parallel",
+        "variants": {
+            "easy": {"file": "ex06_langgraph_basics", "difficulty": "easy", "estimated_minutes": 35},
+            "medium": {"file": "ex06_langgraph_parallel", "difficulty": "hard", "estimated_minutes": 40},
+        },
+    },
+    8: {
+        "name": "Orchestrator",
+        "day": 2,
+        "difficulty": "medium",
+        "estimated_minutes": 45,
+        "file": "ex07_orchestrator_advanced",
+        "variants": {
+            "easy": {"file": "ex07_orchestrator", "difficulty": "medium", "estimated_minutes": 40},
+            "medium": {"file": "ex07_orchestrator_advanced", "difficulty": "hard", "estimated_minutes": 45},
+        },
+    },
 }
 LOCAL_CACHE_FILE = Path.home() / ".langchain_workshop" / "progress_cache.json"
 
@@ -30,12 +110,52 @@ class ProgressTracker:
     firebase: FirebaseClient
     user_id: str
     local_cache: dict[str, bool]
+    user_level: str
 
-    def __init__(self, firebase_client: FirebaseClient, user_id: str):
+    def __init__(self, firebase_client: FirebaseClient, user_id: str, user_level: str = "medium"):
         self.firebase = firebase_client
         self.user_id = user_id
+        self.user_level = (user_level or "medium").lower()
         self.local_cache = {}
         self._load_cache()
+
+    def set_user_level(self, level: str) -> None:
+        """Atualiza o nível do usuário (easy/medium)."""
+        if level:
+            self.user_level = level.lower()
+
+    def get_exercise_info(self, exercise_num: int, level: str | None = None) -> dict[str, Any]:
+        """Retorna informações do exercício para o nível informado."""
+        ex_config = EXERCISES.get(exercise_num)
+        if not ex_config:
+            raise KeyError(f"Exercício {exercise_num} não configurado.")
+
+        variants = ex_config.get("variants", {})
+        desired_level = (level or self.user_level or "medium").lower()
+
+        variant = variants.get(desired_level)
+        if variant is None:
+            fallback_level = "medium" if "medium" in variants else next(iter(variants), None)
+            if fallback_level:
+                variant = variants[fallback_level]
+                desired_level = fallback_level
+            else:
+                variant = {}
+
+        return {
+            "name": ex_config["name"],
+            "day": ex_config["day"],
+            "difficulty": variant.get("difficulty", ex_config.get("difficulty")),
+            "estimated_minutes": variant.get("estimated_minutes", ex_config.get("estimated_minutes")),
+            "file": variant.get("file", ex_config.get("file")),
+            "level": desired_level,
+            "variants": variants,
+        }
+
+    def get_exercise_file(self, exercise_num: int, level: str | None = None) -> str:
+        """Retorna o nome do arquivo (sem extensão) do exercício."""
+        info = self.get_exercise_info(exercise_num, level)
+        return info["file"]
 
     def _load_cache(self):
         if LOCAL_CACHE_FILE.exists():
@@ -129,8 +249,11 @@ class ProgressTracker:
             console.print(f"[yellow]⚠️  Erro ao salvar resultado: {e}[/yellow]")
 
     def _show_completion_message(self, exercise_num: int):
-        ex_info = EXERCISES.get(exercise_num, {})
-        ex_name = ex_info.get("name", f"Exercício {exercise_num}")
+        try:
+            ex_info = self.get_exercise_info(exercise_num)
+            ex_name = ex_info["name"]
+        except KeyError:
+            ex_name = f"Exercício {exercise_num}"
 
         progress = self.get_progress()
         completed_count = len(progress.get("completed_exercises", []))
@@ -142,7 +265,7 @@ class ProgressTracker:
         if completed_count == total:
             message += "\n\n[bold yellow]🏆 WORKSHOP COMPLETO! 🏆[/bold yellow]"
             message += "\nVocê dominou LangChain Agents!"
-        elif exercise_num == 4:
+        elif exercise_num == 6:
             message += "\n\n[bold cyan]✨ Dia 1 completo! ✨[/bold cyan]"
             message += "\nVamos para os exercícios avançados do Dia 2!"
 
@@ -166,13 +289,14 @@ class ProgressTracker:
 
         table = Table(show_header=True, header_style="bold magenta")
         table.add_column("#", style="dim", width=3)
-        table.add_column("Nome", width=25)
+        table.add_column("Nome", width=30)
         table.add_column("Dia", width=4)
+        table.add_column("Versão", width=9)
         table.add_column("Status", width=12)
         table.add_column("Tentativas", width=10)
 
         for ex_num in sorted(EXERCISES.keys()):
-            ex_info = EXERCISES[ex_num]
+            ex_info = self.get_exercise_info(ex_num)
 
             if ex_num in completed:
                 status = "[green]✅ Completo[/green]"
@@ -191,6 +315,7 @@ class ProgressTracker:
                 str(ex_num),
                 ex_info["name"],
                 f"Dia {ex_info['day']}",
+                ex_info.get("difficulty", "-").capitalize(),
                 status,
                 attempts_str
             )
@@ -210,7 +335,10 @@ class ProgressTracker:
 
         for ex_str, levels in hints_used.items():
             ex_num = int(ex_str)
-            ex_name = EXERCISES.get(ex_num, {}).get("name", f"Exercício {ex_num}")
+            try:
+                ex_name = self.get_exercise_info(ex_num)["name"]
+            except KeyError:
+                ex_name = f"Exercício {ex_num}"
             console.print(f"  {ex_name}: {len(levels)}/4 dicas ({levels})")
 
         console.print()
@@ -252,12 +380,17 @@ class ProgressTracker:
 
         progress = self.get_progress()
         current_ex = progress.get("current_exercise", 1)
+        try:
+            current_info = self.get_exercise_info(current_ex)
+        except KeyError:
+            current_info = {"name": f"Exercício {current_ex}"}
         completed = len(progress.get("completed_exercises", []))
+        total = len(EXERCISES)
 
         welcome = f"[bold cyan]Bem-vindo(a) de volta, {username}![/bold cyan]\n\n"
         welcome += f"Nível: [yellow]{level.upper()}[/yellow]\n"
-        welcome += f"Progresso: {completed}/7 exercícios completos\n"
-        welcome += f"Exercício atual: #{current_ex} - {EXERCISES[current_ex]['name']}\n\n"
+        welcome += f"Progresso: {completed}/{total} exercícios completos\n"
+        welcome += f"Exercício atual: #{current_ex} - {current_info['name']}\n\n"
         welcome += "[dim]Digite 'help' ou '?' para ver comandos disponíveis[/dim]"
 
         console.print(Panel(welcome, border_style="cyan", padding=1))

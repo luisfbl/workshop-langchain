@@ -44,7 +44,7 @@ from pathlib import Path
 import ast
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph import StateGraph, END
 
 # ============================================================================
@@ -114,7 +114,7 @@ def analyze_single_file(file_path: str) -> FileResult:
         # TODO: Implemente contagem
 
         # TODO: Gerar documentacao
-        llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.7)
+        llm = ChatOpenAI(model="gpt-5-nano", temperature=0.7)
         # ... gere doc
 
         documentation = "TODO"  # TODO: gerar de verdade

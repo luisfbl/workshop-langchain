@@ -42,3 +42,9 @@ data/
 
 # Session files
 .langchain_workshop/
+
+# Exercícios copiados dinamicamente (mantém apenas exercises_source/)
+exercises/day1/*
+!exercises/day1/.gitkeep
+exercises/day2/*
+!exercises/day2/.gitkeep

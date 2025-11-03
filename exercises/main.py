@@ -26,10 +26,17 @@ from typing import Optional
 
 # Importar o orchestrator do ex07
 # (Em um projeto real, você refatoraria isso em módulos)
-from day2.easy.ex07_orchestrator import (
-    create_orchestrator_graph,
-    OrchestratorState
-)
+# Nota: Os exercícios são copiados dinamicamente baseado no nível do usuário
+try:
+    from day2.ex07_orchestrator import (
+        create_orchestrator_graph,
+        OrchestratorState
+    )
+except ImportError:
+    # Fallback para quando exercícios não estão configurados
+    print("⚠️  Exercícios ainda não configurados. Execute 'python main.py' primeiro.")
+    create_orchestrator_graph = None
+    OrchestratorState = None
 
 
 # ============================================================================
@@ -146,7 +153,7 @@ Exemplos:
 Este projeto usa:
   - LangChain para agentes e tools
   - LangGraph para workflow orchestration
-  - OpenAI GPT-4o-mini para geração de docs
+  - OpenAI gpt-5-nano para geração de docs
         """,
         formatter_class=argparse.RawDescriptionHelpFormatter
     )

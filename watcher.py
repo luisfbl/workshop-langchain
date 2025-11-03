@@ -1,8 +1,12 @@
 import subprocess
 import sys
 import time
+import warnings
 from pathlib import Path
 from typing import Optional, override
+
+# Silencia warning de deprecação do pkg_resources (dependência do gcloud)
+warnings.filterwarnings("ignore", message="pkg_resources is deprecated")
 
 from rich.console import Console
 from rich.live import Live
@@ -16,7 +20,8 @@ from utils.api_key_manager import APIKeyManager, RateLimiter, setup_environment_
 from utils.auth import Authenticator
 from utils.firebase_client import FirebaseClient
 from utils.hints import HintManager
-from utils.progress_tracker import ProgressTracker
+from utils.progress_tracker import ProgressTracker, EXERCISES
+from utils.exercise_manager import ExerciseManager
 
 
 console = Console()
@@ -39,6 +44,10 @@ class WorkshopSession:
 
         user_data = self.firebase.get_user(self.user_id)
         self.user_level = user_data.get("level", "medium") if user_data else "medium"
+        self.progress.set_user_level(self.user_level)
+
+        # Gerenciador de exercícios
+        self.exercise_manager = ExerciseManager(self.project_root)
 
         # Estado
         self.is_running = False
@@ -47,6 +56,14 @@ class WorkshopSession:
 
     def start(self):
         console.clear()
+
+        # Configura exercícios do nível do usuário (apenas se necessário)
+        if not self.exercise_manager.are_exercises_configured(self.user_level):
+            console.print("[cyan]📁 Configurando exercícios...[/cyan]")
+            if self.exercise_manager.setup_user_exercises(self.user_level):
+                console.print("[green]✅ Exercícios configurados![/green]\n")
+            else:
+                console.print("[yellow]⚠️  Aviso: Erro ao configurar exercícios[/yellow]\n")
 
         console.print("[yellow]🔑 Verificando API key...[/yellow]")
         try:
@@ -76,16 +93,13 @@ class WorkshopSession:
         event_handler = ExerciseWatcher(self)
         self.observer = Observer()
 
-        # Monitora day1/easy, day1/medium, day2/easy, day2/medium
+        # Monitora day1 e day2 (exercícios já foram filtrados por nível)
         for day_dir in ["day1", "day2"]:
-            for level_dir in ["easy", "medium"]:
-                watch_dir = self.exercises_dir / day_dir / level_dir
-                if watch_dir.exists():
-                    self.observer.schedule(event_handler, str(watch_dir), recursive=False)
-                    console.print(f"[dim]Monitorando: {day_dir}/{level_dir}[/dim]")
+            watch_dir = self.exercises_dir / day_dir
+            if watch_dir.exists():
+                self.observer.schedule(event_handler, str(watch_dir), recursive=True)
 
         self.observer.start()
-        console.print("[green]👀 Watcher iniciado! Modificações serão detectadas automaticamente.[/green]\n")
 
     def _command_loop(self):
         """Loop principal de comandos"""
@@ -183,10 +197,10 @@ class WorkshopSession:
         else:
             try:
                 ex_num = int(args[0])
-                if 1 <= ex_num <= 7:
+                if 1 <= ex_num <= 8:
                     self.run_tests(ex_num)
                 else:
-                    console.print("[red]❌ Número de exercício inválido (1-7)[/red]")
+                    console.print("[red]❌ Número de exercício inválido (1-8)[/red]")
             except ValueError:
                 console.print("[red]❌ Use: test <número>[/red]")
 
@@ -210,7 +224,7 @@ class WorkshopSession:
         current = self.progress.get_current_exercise()
         if current > 1:
             prev_ex = current - 1
-            ex_name = self.progress.EXERCISES[prev_ex]["name"]
+            ex_name = EXERCISES[prev_ex]["name"]
             console.print(f"[cyan]Exercício {prev_ex}: {ex_name}[/cyan]")
             console.print("[dim]Você pode visualizar, mas não pode re-submeter.[/dim]")
         else:
@@ -249,68 +263,8 @@ class WorkshopSession:
                         errors.append(f"  | {' ' * (e.offset - 1)}^ {e.msg}")
                 return {"success": False, "errors": errors}
 
-            # 2. Usa Pyright via subprocess (rápido!)
-            try:
-                import subprocess
-                import shutil
-
-                # Verifica se pyright está instalado
-                pyright_path = shutil.which('pyright')
-                if not pyright_path:
-                    # Pyright não instalado - usa apenas verificação básica
-                    return {"success": True, "errors": []}
-
-                # Roda Pyright com timeout de 3 segundos
-                result = subprocess.run(
-                    ['pyright', '--outputjson', str(file_path)],
-                    capture_output=True,
-                    text=True,
-                    timeout=3
-                )
-
-                # Parse JSON output
-                if result.stdout:
-                    import json
-                    try:
-                        output = json.loads(result.stdout)
-
-                        # Pyright retorna diagnósticos
-                        if 'generalDiagnostics' in output:
-                            for diag in output['generalDiagnostics']:
-                                severity = diag.get('severity', 'error')
-                                message = diag.get('message', '')
-                                line = diag.get('range', {}).get('start', {}).get('line', 0) + 1
-
-                                # Filtra apenas erros (não warnings)
-                                if severity == 'error':
-                                    # Traduz mensagens comuns
-                                    if 'is not defined' in message or 'Cannot find' in message:
-                                        # Extrai nome da variável
-                                        import re
-                                        match = re.search(r'"([^"]+)"', message)
-                                        var_name = match.group(1) if match else "variável"
-                                        errors.append(f"[red]error[/red]: nome não definido `{var_name}`")
-                                        errors.append(f" --> {file_path.name}:{line}")
-                                    else:
-                                        errors.append(f"[red]error[/red]: {message}")
-                                        errors.append(f" --> {file_path.name}:{line}")
-
-                        if errors:
-                            return {"success": False, "errors": errors}
-
-                    except json.JSONDecodeError:
-                        # Se não conseguir parsear JSON, ignora Pyright
-                        pass
-
-            except subprocess.TimeoutExpired:
-                # Timeout - usa verificação básica
-                return {"success": True, "errors": []}
-            except FileNotFoundError:
-                # Pyright não encontrado - usa verificação básica
-                return {"success": True, "errors": []}
-            except Exception:
-                # Qualquer outro erro - usa verificação básica
-                return {"success": True, "errors": []}
+            # 2. Pyright desabilitado - causa muitos falsos positivos
+            # Apenas verificação de sintaxe Python é suficiente
 
             return {"success": True, "errors": []}
 
@@ -322,32 +276,18 @@ class WorkshopSession:
         Verifica se o exercício está pronto para testar.
         Retorna False se encontrar 'I AM NOT DONE' no arquivo.
         """
-        # Determina o diretório do exercício baseado no nível do usuário
-        if exercise_num <= 4:
-            day = "day1"
-        else:
-            day = "day2"
+        try:
+            ex_info = self.progress.get_exercise_info(exercise_num)
+        except KeyError:
+            console.print(f"[yellow]⚠️  Exercício {exercise_num} não está configurado[/yellow]")
+            return True
 
-        # Usa o nível do usuário (easy ou medium)
-        level_dir = self.user_level
+        day_dir = self.exercises_dir / f"day{ex_info['day']}"
+        exercise_path = day_dir / f"{ex_info['file']}.py"
 
-        # Monta caminho do arquivo do exercício com nível
-        exercise_file = self.exercises_dir / day / level_dir / f"ex{exercise_num:02d}_*.py"
-
-        # Encontra o arquivo (pode ter nomes diferentes)
-        from glob import glob
-        matches = glob(str(exercise_file))
-
-        if not matches:
-            # Se não encontrar no diretório de nível, tenta o antigo (fallback)
-            exercise_file_old = self.exercises_dir / day / f"ex{exercise_num:02d}_*.py"
-            matches = glob(str(exercise_file_old))
-
-            if not matches:
-                console.print(f"[yellow]⚠️  Exercício {exercise_num} não encontrado[/yellow]")
-                return True
-
-        exercise_path = Path(matches[0])
+        if not exercise_path.exists():
+            console.print(f"[yellow]⚠️  Arquivo do exercício {exercise_num} não encontrado ({exercise_path})[/yellow]")
+            return True
 
         try:
             content = exercise_path.read_text(encoding='utf-8')
@@ -376,7 +316,7 @@ class WorkshopSession:
 
             # Verifica se o exercício está marcado como "I AM NOT DONE"
             if not self._is_exercise_ready(exercise_num):
-                ex_name = self.progress.EXERCISES[exercise_num]["name"]
+                ex_name = EXERCISES[exercise_num]["name"]
                 console.print(f"\n[yellow]📝 Exercício {exercise_num}: {ex_name}[/yellow]")
                 console.print("[dim]O exercício ainda contém 'I AM NOT DONE'.[/dim]")
                 console.print("[dim]Quando terminar de implementar, remova esse comentário para rodar os testes.[/dim]\n")
@@ -389,7 +329,7 @@ class WorkshopSession:
                 return
 
             # Mostra que está rodando
-            ex_name = self.progress.EXERCISES[exercise_num]["name"]
+            ex_name = EXERCISES[exercise_num]["name"]
             console.print(f"\n[yellow]🧪 Testando Exercício {exercise_num}: {ex_name}...[/yellow]")
 
             # Prepara ambiente
@@ -409,11 +349,11 @@ class WorkshopSession:
             start_time = time.time()
 
             result = subprocess.run(
-                [sys.executable, "-m", "pytest", str(test_file), "-v", "--tb=short"],
+                [sys.executable, "-m", "pytest", str(test_file), "-v", "-s", "--tb=short"],
                 capture_output=True,
                 text=True,
                 env=env,
-                timeout=30,
+                timeout=60,
                 cwd=str(self.project_root)
             )
 
@@ -424,6 +364,12 @@ class WorkshopSession:
 
             if passed:
                 console.print(f"[bold green]✅ TODOS OS TESTES PASSARAM! ({elapsed:.1f}s)[/bold green]")
+
+                # Mostrar output dos testes (perguntas e respostas da IA)
+                if result.stdout and len(result.stdout.strip()) > 0:
+                    console.print("\n[dim]Detalhes da execução:[/dim]")
+                    console.print(result.stdout)
+
                 self.progress.save_test_result(exercise_num, True)
                 self.rate_limiter.increment_usage(exercise_num)
             else:
@@ -437,7 +383,7 @@ class WorkshopSession:
                 self.progress.save_test_result(exercise_num, False)
 
         except subprocess.TimeoutExpired:
-            console.print("[red]❌ Timeout - teste demorou mais de 30 segundos[/red]")
+            console.print("[red]❌ Timeout - teste demorou mais de 60 segundos[/red]")
         except Exception as e:
             console.print(f"[red]❌ Erro ao executar testes: {e}[/red]")
         finally:

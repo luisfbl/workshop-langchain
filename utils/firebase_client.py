@@ -1,53 +1,43 @@
 import gzip
+import json
 import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-import firebase_admin
-from firebase_admin import credentials, firestore
-from google.cloud.client import Client
-from google.cloud.firestore import SERVER_TIMESTAMP, CollectionReference
+import pyrebase
 
 
 class FirebaseClient:
     config_path: Path
-    db: Client
-
-    users_ref: CollectionReference
-    progress_ref: CollectionReference
-    exercises_ref: CollectionReference
-    api_usage_ref: CollectionReference
-    system_config_ref: CollectionReference
-
+    db: Any
+    firebase: Any
     def __init__(self, config: str | None = None):
-        if firebase_admin is None:
-            raise ImportError("Firebase Admin SDK não instalado")
-
         config_path = None
         if config is None:
             config_path = (
-                Path(__file__).parent.parent / "config" / "firebase_config.json"
+                Path(__file__).parent.parent / "config" / "firebase_web_config.json"
             )
 
         if config_path is None or not config_path.exists():
             raise FileNotFoundError(
-                f"Arquivo de configuração do Firebase não encontrado: {self.config_path}\n"
+                f"Arquivo de configuração do Firebase não encontrado: {config_path}\n" +
+                "Certifique-se de que config/firebase_web_config.json existe."
             )
 
         self.config_path = Path(config_path)
 
-        if not firebase_admin._apps:
-            cred = credentials.Certificate(str(self.config_path))
-            firebase_admin.initialize_app(cred)
+        with open(self.config_path, 'r') as f:
+            firebase_config = json.load(f)
 
-        self.db = firestore.client()
+        if 'databaseURL' not in firebase_config:
+            raise ValueError(
+                "O campo 'databaseURL' é obrigatório no arquivo de configuração.\n" +
+                "Adicione: \"databaseURL\": \"https://{projectId}-default-rtdb.firebaseio.com\""
+            )
 
-        self.users_ref = self.db.collection("users")
-        self.progress_ref = self.db.collection("progress")
-        self.exercises_ref = self.db.collection("exercises")
-        self.api_usage_ref = self.db.collection("api_usage")
-        self.system_config_ref = self.db.collection("system_config")
+        self.firebase = pyrebase.initialize_app(firebase_config)
+        self.db = self.firebase.database()
 
     def create_user(self, username: str, password_hash: str) -> str | None:
         try:
@@ -56,12 +46,12 @@ class FirebaseClient:
             user_data = {
                 "username": username,
                 "password_hash": password_hash,
-                "created_at": SERVER_TIMESTAMP,
+                "created_at": datetime.now().isoformat(),
                 "level": None,
-                "last_activity": SERVER_TIMESTAMP,
+                "last_activity": datetime.now().isoformat(),
             }
 
-            _ = self.users_ref.document(user_id).set(user_data)
+            self.db.child("users").child(user_id).set(user_data)
             self._initialize_progress(user_id)
 
             return user_id
@@ -71,18 +61,16 @@ class FirebaseClient:
 
     def get_user_by_username(self, username: str) -> dict[str, Any] | None:
         try:
-            query = self.users_ref.where("username", "==", username).limit(1)
-            results = list(query.stream())
+            users = self.db.child("users").get()
 
-            if results:
-                doc = results[0]
-                data = doc.to_dict()
+            if users.val() is None:
+                return None
 
-                if data is None:
-                    return None
+            for user_id, user_data in users.val().items():
+                if user_data.get("username") == username:
+                    user_data["user_id"] = user_id
+                    return user_data
 
-                data["user_id"] = doc.id
-                return data
             return None
         except Exception as e:
             print(f"Erro ao buscar usuário: {e}")
@@ -90,30 +78,28 @@ class FirebaseClient:
 
     def get_user(self, user_id: str) -> dict[str, Any] | None:
         try:
-            doc = self.users_ref.document(user_id).get()
-            if doc.exists:
-                data = doc.to_dict()
+            user = self.db.child("users").child(user_id).get()
 
-                if data is None:
-                    return None
+            if user.val() is None:
+                return None
 
-                data["user_id"] = doc.id
-                return data
-            return None
+            data = user.val()
+            data["user_id"] = user_id
+            return data
         except Exception as e:
             print(f"Erro ao buscar usuário: {e}")
             return None
 
     def update_user_level(self, user_id: str, level: str):
         try:
-            self.users_ref.document(user_id).update({"level": level})
+            self.db.child("users").child(user_id).update({"level": level})
         except Exception as e:
             print(f"Erro ao atualizar nível: {e}")
 
     def update_last_activity(self, user_id: str):
         try:
-            self.users_ref.document(user_id).update(
-                {"last_activity": SERVER_TIMESTAMP}
+            self.db.child("users").child(user_id).update(
+                {"last_activity": datetime.now().isoformat()}
             )
         except Exception as e:
             print(f"Erro ao atualizar atividade: {e}")
@@ -124,49 +110,53 @@ class FirebaseClient:
             "completed_exercises": [],
             "exercise_attempts": {},
             "hints_used": {},
-            "start_time": SERVER_TIMESTAMP,
-            "last_activity": SERVER_TIMESTAMP,
+            "start_time": datetime.now().isoformat(),
+            "last_activity": datetime.now().isoformat(),
             "test_results": {},
         }
-        self.progress_ref.document(user_id).set(progress_data)
+        self.db.child("progress").child(user_id).set(progress_data)
 
     def get_progress(self, user_id: str) -> dict[str, Any] | None:
         try:
-            doc = self.progress_ref.document(user_id).get()
-            if doc.exists:
-                return doc.to_dict()
-            else:
+            progress = self.db.child("progress").child(user_id).get()
+
+            if progress.val() is None:
                 self._initialize_progress(user_id)
                 return self.get_progress(user_id)
+
+            return progress.val()
         except Exception as e:
             print(f"Erro ao buscar progresso: {e}")
             return None
 
     def update_progress(self, user_id: str, updates: dict[str, Any]):
         try:
-            updates["last_activity"] = SERVER_TIMESTAMP
-            self.progress_ref.document(user_id).update(updates)
+            updates["last_activity"] = datetime.now().isoformat()
+            self.db.child("progress").child(user_id).update(updates)
         except Exception as e:
             print(f"Erro ao atualizar progresso: {e}")
 
     def mark_exercise_complete(self, user_id: str, exercise_num: int):
         try:
-            doc_ref = self.progress_ref.document(user_id)
-            doc = doc_ref.get()
+            progress = self.db.child("progress").child(user_id).get()
 
-            if doc.exists:
-                data = doc.to_dict()
+            if progress.val() is not None:
+                data = progress.val()
+                # Garante que data é um dict, não uma lista
+                if not isinstance(data, dict):
+                    print(f"Aviso: progress.val() retornou tipo inesperado: {type(data)}")
+                    return
                 completed = data.get("completed_exercises", [])
 
                 if exercise_num not in completed:
                     completed.append(exercise_num)
                     completed.sort()
 
-                    _ = doc_ref.update(
+                    self.db.child("progress").child(user_id).update(
                         {
                             "completed_exercises": completed,
                             "current_exercise": exercise_num + 1,
-                            "last_activity": SERVER_TIMESTAMP,
+                            "last_activity": datetime.now().isoformat(),
                         }
                     )
         except Exception as e:
@@ -174,11 +164,14 @@ class FirebaseClient:
 
     def add_hint_used(self, user_id: str, exercise_num: int, hint_level: int):
         try:
-            doc_ref = self.progress_ref.document(user_id)
-            doc = doc_ref.get()
+            progress = self.db.child("progress").child(user_id).get()
 
-            if doc.exists:
-                data = doc.to_dict()
+            if progress.val() is not None:
+                data = progress.val()
+                # Garante que data é um dict, não uma lista
+                if not isinstance(data, dict):
+                    print(f"Aviso: progress.val() retornou tipo inesperado: {type(data)}")
+                    return
                 hints = data.get("hints_used", {})
                 key = str(exercise_num)
 
@@ -189,38 +182,78 @@ class FirebaseClient:
                     hints[key].append(hint_level)
                     hints[key].sort()
 
-                _ = doc_ref.update(
+                self.db.child("progress").child(user_id).update(
                     {
                         "hints_used": hints,
-                        "last_activity": SERVER_TIMESTAMP,
+                        "last_activity": datetime.now().isoformat(),
                     }
                 )
         except Exception as e:
             print(f"Erro ao registrar dica: {e}")
 
+    def increment_attempt(self, user_id: str, exercise_num: int):
+        """Incrementa contador de tentativas de um exercício"""
+        try:
+            progress = self.db.child("progress").child(user_id).get()
+
+            data = {}
+            if progress.val() is not None:
+                val = progress.val()
+                # Garante que data é um dict, não uma lista
+                if isinstance(val, dict):
+                    data = val
+                # Silenciosamente converte tipos incorretos para dict vazio
+
+            attempts = data.get("exercise_attempts", {})
+            # Garantir que attempts é um dict, não uma lista
+            if not isinstance(attempts, dict):
+                attempts = {}
+
+            key = str(exercise_num)
+
+            attempts[key] = attempts.get(key, 0) + 1
+
+            self.db.child("progress").child(user_id).update(
+                {
+                    "exercise_attempts": attempts,
+                    "last_activity": datetime.now().isoformat(),
+                }
+            )
+        except Exception as e:
+            print(f"Erro ao incrementar tentativa: {e}")
+
     def save_test_result(self, user_id: str, exercise_num: int, passed: bool):
         try:
-            doc_ref = self.progress_ref.document(user_id)
-            doc = doc_ref.get()
+            progress = self.db.child("progress").child(user_id).get()
 
-            if doc.exists:
-                data = doc.to_dict()
-                results = data.get("test_results", {})
-                key = str(exercise_num)
+            data = {}
+            if progress.val() is not None:
+                val = progress.val()
+                # Garante que data é um dict, não uma lista
+                if isinstance(val, dict):
+                    data = val
+                # Silenciosamente converte tipos incorretos para dict vazio
 
-                if key not in results:
-                    results[key] = {"passed": False, "attempts": 0}
+            results = data.get("test_results", {})
+            # Garantir que results é um dict, não uma lista
+            if not isinstance(results, dict):
+                results = {}
 
-                results[key]["passed"] = passed
-                results[key]["attempts"] = results[key].get("attempts", 0) + 1
-                results[key]["last_attempt"] = datetime.now().isoformat()
+            key = str(exercise_num)
 
-                _ = doc_ref.update(
-                    {
-                        "test_results": results,
-                        "last_activity": SERVER_TIMESTAMP,
-                    }
-                )
+            if key not in results:
+                results[key] = {"passed": False, "attempts": 0}
+
+            results[key]["passed"] = passed
+            results[key]["attempts"] = results[key].get("attempts", 0) + 1
+            results[key]["last_attempt"] = datetime.now().isoformat()
+
+            self.db.child("progress").child(user_id).update(
+                {
+                    "test_results": results,
+                    "last_activity": datetime.now().isoformat(),
+                }
+            )
         except Exception as e:
             print(f"Erro ao salvar resultado: {e}")
 
@@ -231,11 +264,14 @@ class FirebaseClient:
             import base64
             compressed_b64 = base64.b64encode(compressed).decode("ascii")
 
-            doc_ref = self.progress_ref.document(user_id)
-            doc = doc_ref.get()
+            progress = self.db.child("progress").child(user_id).get()
 
-            if doc.exists:
-                data = doc.to_dict()
+            if progress.val() is not None:
+                data = progress.val()
+                # Garante que data é um dict, não uma lista
+                if not isinstance(data, dict):
+                    print(f"Aviso: progress.val() retornou tipo inesperado: {type(data)}")
+                    return
                 solutions = data.get("solutions", {})
                 key = str(exercise_num)
 
@@ -245,10 +281,10 @@ class FirebaseClient:
                     "size": len(code),
                 }
 
-                _ = doc_ref.update(
+                self.db.child("progress").child(user_id).update(
                     {
                         "solutions": solutions,
-                        "last_activity": SERVER_TIMESTAMP,
+                        "last_activity": datetime.now().isoformat(),
                     }
                 )
         except Exception as e:
@@ -256,12 +292,16 @@ class FirebaseClient:
 
     def get_exercise_solution(self, user_id: str, exercise_num: int) -> str | None:
         try:
-            doc = self.progress_ref.document(user_id).get()
+            progress = self.db.child("progress").child(user_id).get()
 
-            if not doc.exists:
+            if progress.val() is None:
                 return None
 
-            data = doc.to_dict()
+            data = progress.val()
+            # Garante que data é um dict, não uma lista
+            if not isinstance(data, dict):
+                print(f"Aviso: progress.val() retornou tipo inesperado: {type(data)}")
+                return None
             solutions = data.get("solutions", {})
             key = str(exercise_num)
 
@@ -281,29 +321,45 @@ class FirebaseClient:
 
     def get_exercise(self, exercise_id: str) -> dict[str, Any] | None:
         try:
-            doc = self.exercises_ref.document(exercise_id).get()
-            if doc.exists:
-                return doc.to_dict()
-            return None
+            exercise = self.db.child("exercises").child(exercise_id).get()
+
+            if exercise.val() is None:
+                return None
+
+            return exercise.val()
         except Exception as e:
             print(f"Erro ao buscar exercício: {e}")
             return None
 
     def get_all_exercises(self) -> list[dict[str, Any]]:
         try:
-            docs = self.exercises_ref.order_by("order").stream()
-            return [doc.to_dict() for doc in docs]
+            exercises = self.db.child("exercises").get()
+
+            if exercises.val() is None:
+                return []
+
+            # Converte para lista e ordena por 'order'
+            exercise_list = []
+            for ex_id, ex_data in exercises.val().items():
+                ex_data['id'] = ex_id
+                exercise_list.append(ex_data)
+
+            # Ordena por 'order' se existir
+            exercise_list.sort(key=lambda x: x.get('order', 0))
+            return exercise_list
         except Exception as e:
             print(f"Erro ao buscar exercícios: {e}")
             return []
 
     def get_api_key(self) -> str | None:
         try:
-            doc = self.system_config_ref.document("api_credentials").get()
-            if doc.exists:
-                data = doc.to_dict()
-                return data.get("api_key")
-            return None
+            credentials = self.db.child("system_config").child("api_credentials").get()
+
+            if credentials.val() is None:
+                return None
+
+            data = credentials.val()
+            return data.get("api_key")
         except Exception as e:
             print(f"Erro ao buscar API key: {e}")
             return None
@@ -313,20 +369,23 @@ class FirebaseClient:
             data = {
                 "api_key": api_key,
                 "provider": provider,
-                "updated_at": SERVER_TIMESTAMP,
+                "updated_at": datetime.now().isoformat(),
             }
-            self.system_config_ref.document("api_credentials").set(data)
+            self.db.child("system_config").child("api_credentials").set(data)
         except Exception as e:
             print(f"Erro ao salvar API key: {e}")
 
     def increment_api_usage(self, user_id: str, exercise_num: int):
         try:
-            doc_ref = self.api_usage_ref.document(user_id)
-            doc = doc_ref.get()
+            usage_data = self.db.child("api_usage").child(user_id).get()
             data: dict[str, Any] | None = None
 
-            if doc.exists:
-                data = doc.to_dict()
+            if usage_data.val() is not None:
+                data = usage_data.val()
+                # Garante que data é um dict, não uma lista
+                if not isinstance(data, dict):
+                    print(f"Aviso: api_usage.val() retornou tipo inesperado: {type(data)}")
+                    data = None
 
             if data is None:
                 data = {
@@ -347,24 +406,42 @@ class FirebaseClient:
             data["calls_today"] += 1
 
             key = str(exercise_num)
+            # Proteção extra para garantir que data é dict
+            if not isinstance(data, dict):
+                print(f"Erro: data não é dict em increment_api_usage: {type(data)}")
+                return
             calls_by_ex = data.get("calls_by_exercise", {})
+            if not isinstance(calls_by_ex, dict):
+                calls_by_ex = {}
             calls_by_ex[key] = calls_by_ex.get(key, 0) + 1
             data["calls_by_exercise"] = calls_by_ex
 
-            doc_ref.set(data)
+            self.db.child("api_usage").child(user_id).set(data)
         except Exception as e:
             print(f"Erro ao incrementar uso de API: {e}")
 
     def get_api_usage(self, user_id: str) -> dict[str, Any] | None:
         try:
-            doc = self.api_usage_ref.document(user_id).get()
-            if doc.exists:
-                return doc.to_dict()
-            return {
-                "total_calls": 0,
-                "calls_today": 0,
-                "calls_by_exercise": {},
-            }
+            usage = self.db.child("api_usage").child(user_id).get()
+
+            if usage.val() is None:
+                return {
+                    "total_calls": 0,
+                    "calls_today": 0,
+                    "calls_by_exercise": {},
+                }
+
+            data = usage.val()
+            # Garante que data é um dict, não uma lista
+            if not isinstance(data, dict):
+                print(f"Aviso: api_usage.val() retornou tipo inesperado: {type(data)}")
+                return {
+                    "total_calls": 0,
+                    "calls_today": 0,
+                    "calls_by_exercise": {},
+                }
+
+            return data
         except Exception as e:
             print(f"Erro ao buscar uso de API: {e}")
             return {}

@@ -21,11 +21,11 @@ incluindo validações, scores calculados e estruturas aninhadas.
 
 from pathlib import Path
 from typing import List, Optional
-from pydantic import BaseModel, Field, validator
-from langchain.agents import create_react_agent, AgentExecutor, tool
+from pydantic import BaseModel, Field, field_validator
+from pydantic_core import ValidationInfo
+from langchain.agents import create_agent
+from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
-from langchain.memory import ConversationBufferMemory
-from langchain import hub
 import ast
 import json
 
@@ -42,11 +42,13 @@ class FunctionInfo(BaseModel):
     line_number: int = Field(description="Linha onde está definida")
     is_private: bool = Field(default=False, description="Se é função privada (_func)")
 
-    @validator('is_private', always=True)
-    def check_private(cls, v, values):
+    @field_validator('is_private', mode='before')
+    @classmethod
+    def check_private(cls, v, info: ValidationInfo):
         """TODO: Valida se função é privada baseado no nome."""
         # DICA: Função é privada se nome começa com _ mas não com __
-        name = values.get('name', '')
+        # Acessar outros campos via info.data
+        name = info.data.get('name', '')
         # TODO: Retornar True se privada, False caso contrário
         pass
 
@@ -71,8 +73,9 @@ class FileAnalysis(BaseModel):
     needs_documentation: bool = Field(description="Se precisa de docs")
     documentation_score: float = Field(description="Score de 0-100")
 
-    @validator('documentation_score', always=True)
-    def calculate_score(cls, v, values):
+    @field_validator('documentation_score', mode='before')
+    @classmethod
+    def calculate_score(cls, v, info: ValidationInfo):
         """
         TODO: Calcula score de documentação.
 
@@ -80,8 +83,8 @@ class FileAnalysis(BaseModel):
         - Se não tem funções/classes: 100 (não precisa docs)
         - Caso contrário: (funções_com_docs / total) * 100
         """
-        functions = values.get('functions', [])
-        classes = values.get('classes', [])
+        functions = info.data.get('functions', [])
+        classes = info.data.get('classes', [])
 
         # TODO: Implemente o cálculo
         pass
@@ -150,8 +153,9 @@ class CodeQuality(BaseModel):
     complexity_score: float = Field(ge=0, le=100, description="Baseado em nº de funções/classes")
     overall_grade: str = Field(description="A, B, C, D ou F")
 
-    @validator('overall_grade', always=True)
-    def calculate_grade(cls, v, values):
+    @field_validator('overall_grade', mode='before')
+    @classmethod
+    def calculate_grade(cls, v, info: ValidationInfo):
         """TODO: Calcular nota baseado nos scores."""
         # A: 90-100, B: 80-89, C: 70-79, D: 60-69, F: <60
         pass

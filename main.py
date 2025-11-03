@@ -1,15 +1,18 @@
 import sys
+import warnings
 from pathlib import Path
 from typing import Any
+
+# Silencia warning de deprecação do pkg_resources (dependência do gcloud)
+warnings.filterwarnings("ignore", message="pkg_resources is deprecated")
 
 from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Confirm, IntPrompt, Prompt
 
-from utils.api_key_manager import APIKeyManager
 from utils.auth import Authenticator
+from utils.exercise_manager import ExerciseManager
 from utils.firebase_client import FirebaseClient
-
 
 console = Console()
 
@@ -34,7 +37,9 @@ def run_initial_quiz() -> str:
 
     score = 0
 
-    console.print("[bold]1. Você já usou APIs de LLM (OpenAI, Anthropic, etc.) antes?[/bold]")
+    console.print(
+        "[bold]1. Você já usou APIs de LLM (OpenAI, Anthropic, etc.) antes?[/bold]"
+    )
     q1 = Prompt.ask("   Resposta", choices=["sim", "nao", "s", "n"], default="nao")
     if q1 in ["sim", "s"]:
         score += 3
@@ -47,7 +52,9 @@ def run_initial_quiz() -> str:
     q2 = IntPrompt.ask("   Escolha (1-4)", default=1)
     score += max(0, q2 - 1)
 
-    console.print("\n[bold]3. Como você avalia seu conhecimento de Python async/await?[/bold]")
+    console.print(
+        "\n[bold]3. Como você avalia seu conhecimento de Python async/await?[/bold]"
+    )
     console.print("   Escala de 1 (iniciante) a 5 (expert)")
     q3 = IntPrompt.ask("   Nota (1-5)", default=3)
     if q3 >= 4:
@@ -55,8 +62,14 @@ def run_initial_quiz() -> str:
     elif q3 >= 3:
         score += 1
 
-    console.print("\n[bold]4. Você entende o conceito de 'function calling' em LLMs?[/bold]")
-    q4 = Prompt.ask("   Resposta", choices=["sim", "nao", "mais-ou-menos", "s", "n", "m"], default="nao")
+    console.print(
+        "\n[bold]4. Você entende o conceito de 'function calling' em LLMs?[/bold]"
+    )
+    q4 = Prompt.ask(
+        "   Resposta",
+        choices=["sim", "nao", "mais-ou-menos", "s", "n", "m"],
+        default="nao",
+    )
     if q4 in ["sim", "s"]:
         score += 3
     elif q4 in ["mais-ou-menos", "m"]:
@@ -94,7 +107,9 @@ def run_initial_quiz() -> str:
 
     change = Confirm.ask("\nDeseja mudar o nível?", default=False)
     if change:
-        choice = Prompt.ask("Escolha o nível", choices=["easy", "medium", "facil", "medio"])
+        choice = Prompt.ask(
+            "Escolha o nível", choices=["easy", "medium", "facil", "medio"]
+        )
         if choice in ["easy", "facil"]:
             level = "easy"
         else:
@@ -107,7 +122,9 @@ def register_flow(auth: Authenticator, firebase: FirebaseClient):
     console.print("\n[bold cyan]📝 REGISTRO DE NOVO USUÁRIO[/bold cyan]\n")
 
     while True:
-        username = Prompt.ask("Nome de usuário (mínimo 3 caracteres, apenas letras e números)")
+        username = Prompt.ask(
+            "Nome de usuário (mínimo 3 caracteres, apenas letras e números)"
+        )
 
         if len(username) < 3:
             console.print("[red]❌ Nome muito curto. Mínimo 3 caracteres.[/red]")
@@ -149,6 +166,15 @@ def register_flow(auth: Authenticator, firebase: FirebaseClient):
         firebase.update_user_level(user_id, level)
 
         console.print(f"\n[green]✅ Nível definido: {level.upper()}[/green]")
+
+        # Configura exercícios do nível escolhido
+        console.print("\n[cyan]📁 Configurando exercícios do seu nível...[/cyan]")
+        exercise_manager = ExerciseManager(Path(__file__).parent)
+        if exercise_manager.setup_user_exercises(level):
+            console.print("[green]✅ Exercícios configurados![/green]")
+        else:
+            console.print("[yellow]⚠️  Aviso: Erro ao configurar exercícios[/yellow]")
+
         console.print("\n[dim]Faça login para começar o workshop.[/dim]\n")
 
         return True
@@ -194,7 +220,9 @@ def main():
         firebase = FirebaseClient()
     except Exception as e:
         console.print(f"[red]❌ Erro ao conectar com Firebase: {e}[/red]")
-        console.print("\nVerifique se o arquivo config/firebase_config.json existe e está correto.")
+        console.print(
+            "\nVerifique se o arquivo config/firebase_config.json existe e está correto."
+        )
         return 1
 
     auth = Authenticator(firebase)
@@ -202,12 +230,15 @@ def main():
     existing_session = auth.get_current_session()
 
     if existing_session:
-        console.print(f"\n[green]Bem-vindo de volta, {existing_session['username']}![/green]\n")
+        console.print(
+            f"\n[green]Bem-vindo de volta, {existing_session['username']}![/green]\n"
+        )
         use_existing = Confirm.ask("Continuar com esta sessão?", default=True)
 
         if use_existing:
             console.print("\n[cyan]Iniciando workshop...[/cyan]\n")
             from watcher import WorkshopSession
+
             workshop = WorkshopSession(existing_session, firebase)
             workshop.start()
             return 0
@@ -227,6 +258,7 @@ def main():
             if session:
                 console.print("\n[cyan]Iniciando workshop...[/cyan]\n")
                 from watcher import WorkshopSession
+
                 workshop = WorkshopSession(session, firebase)
                 workshop.start()
                 break
@@ -252,5 +284,6 @@ if __name__ == "__main__":
     except Exception as e:
         console.print(f"\n[bold red]❌ Erro fatal: {e}[/bold red]")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)

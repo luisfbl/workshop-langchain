@@ -2,11 +2,10 @@ import json
 import os
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 import bcrypt
 from cryptography.fernet import Fernet
-from google.cloud.client import Client
 
 from utils.firebase_client import FirebaseClient
 

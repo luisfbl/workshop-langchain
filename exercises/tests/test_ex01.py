@@ -16,82 +16,86 @@ from exercises.tests.test_helper import import_exercise
 
 # Importa o exercício do nível correto
 ex01 = import_exercise(1, 'ex01_first_agent')
-list_python_files = ex01.list_python_files
-create_file_explorer_agent = ex01.create_file_explorer_agent
+create_llm = ex01.create_llm
+create_basic_agent = ex01.create_basic_agent
 
 
-class TestListPythonFiles:
-    """Testes para a ferramenta list_python_files"""
-    
-    def test_tool_exists(self):
-        """Verifica se a ferramenta foi criada"""
-        assert list_python_files is not None
-        assert callable(list_python_files)
-    
-    def test_tool_has_docstring(self):
-        """Verifica se a ferramenta tem docstring"""
-        # O decorator @tool expõe a docstring via description
-        assert hasattr(list_python_files, 'description')
-        assert len(list_python_files.description) > 20
-    
-    def test_lists_python_files(self, tmp_path):
-        """Testa se lista arquivos Python corretamente"""
-        # Cria arquivos de teste
-        (tmp_path / "test1.py").write_text("# test")
-        (tmp_path / "test2.py").write_text("# test")
-        (tmp_path / "test.txt").write_text("# not python")
-        
-        result = list_python_files.invoke(str(tmp_path))
-        
-        assert "test1.py" in result
-        assert "test2.py" in result
-        assert "test.txt" not in result
-    
-    def test_handles_empty_directory(self, tmp_path):
-        """Testa diretório vazio"""
-        result = list_python_files.invoke(str(tmp_path))
-        # Deve retornar alguma mensagem, não erro
-        assert isinstance(result, str)
-        assert len(result) > 0
+class TestCreateLLM:
+    """Testes para a função create_llm"""
+
+    def test_llm_exists(self):
+        """Verifica se a função create_llm existe"""
+        assert create_llm is not None
+        assert callable(create_llm)
+
+    def test_llm_creation(self):
+        """Verifica se create_llm retorna um LLM válido"""
+        llm = create_llm()
+        assert llm is not None
+
+        # Verifica se é um ChatOpenAI
+        assert hasattr(llm, 'model_name') or hasattr(llm, 'model')
+
+    def test_llm_configuration(self):
+        """Verifica configurações do LLM"""
+        llm = create_llm()
+
+        # Verifica modelo
+        model = getattr(llm, 'model_name', None) or getattr(llm, 'model', None)
+        assert model == "gpt-5-nano"
+
+        # Verifica temperature
+        assert llm.temperature is not None or hasattr(llm, 'model_kwargs')
+        # Temperature pode estar em model_kwargs ou como atributo direto
+        if llm.temperature is not None:
+            assert llm.temperature == 0
 
 
-class TestFileExplorerAgent:
+class TestBasicAgent:
     """Testes para o agente criado"""
-    
-    @pytest.fixture
-    def api_key(self):
-        """Obtém API key do ambiente de teste"""
-        return os.getenv("OPENAI_API_KEY", "test-key")
-    
-    def test_agent_creation(self, api_key):
+
+    def test_agent_creation(self):
         """Verifica se o agente é criado sem erros"""
-        agent = create_file_explorer_agent(api_key)
+        agent = create_basic_agent()
         assert agent is not None
-    
-    def test_agent_has_tools(self, api_key):
-        """Verifica se o agente tem ferramentas configuradas"""
-        agent = create_file_explorer_agent(api_key)
-        assert hasattr(agent, 'tools')
-        assert len(agent.tools) > 0
-        
-        # Deve ter list_python_files
-        tool_names = [tool.name for tool in agent.tools]
-        assert 'list_python_files' in tool_names
-    
+
+    def test_agent_is_callable(self):
+        """Verifica se o agente pode ser invocado"""
+        agent = create_basic_agent()
+
+        # Na API 1.0+, o agente tem método invoke
+        assert hasattr(agent, 'invoke')
+        assert callable(agent.invoke)
+
     @pytest.mark.skipif(not os.getenv("OPENAI_API_KEY"), reason="Requer OPENAI_API_KEY")
-    def test_agent_can_list_files(self, api_key):
-        """Testa se o agente consegue listar arquivos"""
-        agent = create_file_explorer_agent(api_key)
-        
+    def test_agent_can_respond(self):
+        """Testa se o agente consegue responder perguntas simples"""
+        print("\n" + "="*70)
+        print("🧪 TESTE: Primeiro Agente")
+        print("="*70)
+
+        agent = create_basic_agent()
+
+        question = "Diga apenas 'OK'"
+        print(f"\n👤 Pergunta: {question}")
+
+        # API 1.0+ usa messages
         result = agent.invoke({
-            "input": "Liste os arquivos Python no diretório sample_project"
+            "messages": [{"role": "user", "content": question}]
         })
-        
-        assert "output" in result
-        output = result["output"]
-        
-        # Deve mencionar pelo menos um arquivo Python
-        assert "calculator" in output.lower() or ".py" in output.lower()
+
+        # Verifica que retornou messages
+        assert "messages" in result
+        assert len(result["messages"]) > 0
+
+        # Verifica que a última mensagem tem conteúdo
+        last_message = result["messages"][-1]
+        assert hasattr(last_message, 'content')
+        assert len(last_message.content) > 0
+
+        print(f"\n🤖 Resposta: {last_message.content}")
+        print(f"\n📊 Total de mensagens: {len(result['messages'])}")
+        print("="*70)
 
 
 if __name__ == "__main__":

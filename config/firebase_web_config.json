@@ -1,6 +1,7 @@
 {
   "apiKey": "AIzaSyDAjyiDVe7CVcXSMNXBXgiRQl-lMYbVzs0",
   "authDomain": "workshop-c824c.firebaseapp.com",
+  "databaseURL": "https://workshop-c824c-default-rtdb.firebaseio.com",
   "projectId": "workshop-c824c",
   "storageBucket": "workshop-c824c.firebasestorage.app",
   "messagingSenderId": "934782551649",
