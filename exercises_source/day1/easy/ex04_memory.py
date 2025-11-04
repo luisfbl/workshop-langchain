@@ -76,15 +76,11 @@ def create_chat_with_history():
     llm = None  # TODO: ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
     # TODO 2.2: Envolver o LLM com RunnableWithMessageHistory
-    # Isso adiciona gerenciamento automático de histórico
-    chat_with_history = None  # TODO: Criar RunnableWithMessageHistory
-
     # DICA: RunnableWithMessageHistory(
-    #     runnable=llm,
-    #     get_session_history=get_session_history,
-    #     input_messages_key="input",
-    #     history_messages_key="chat_history",
-    # )
+    #    runnable=llm,
+    #    get_session_history=get_session_history,
+    #)
+    chat_with_history = None
 
     return chat_with_history
 
@@ -111,7 +107,7 @@ def chat(chat_with_history, session_id: str, message: str) -> str:
     response = None  # TODO: Implementar invoke
 
     # DICA: result = chat_with_history.invoke(
-    #     {"input": message},
+    #     [HumanMessage(content=message)],
     #     config={"configurable": {"session_id": session_id}}
     # )
 

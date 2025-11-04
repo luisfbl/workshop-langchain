@@ -105,7 +105,7 @@ class Authenticator:
         user_id = self.firebase.create_user(username, password_hash)
 
         if user_id:
-            return True, f"${user_id}"
+            return True, user_id
         else:
             return False, "Erro ao criar usuário no banco de dados"
 

@@ -41,10 +41,10 @@ EXERCISES = {
         "day": 1,
         "difficulty": "medium",
         "estimated_minutes": 25,
-        "file": "ex02_multiple_tools",
+        "file": "ex03_multiple_tools",
         "variants": {
-            "easy": {"file": "ex02_multiple_tools", "difficulty": "easy", "estimated_minutes": 25},
-            "medium": {"file": "ex02_multiple_tools", "difficulty": "medium", "estimated_minutes": 25},
+            "easy": {"file": "ex03_multiple_tools", "difficulty": "easy", "estimated_minutes": 25},
+            "medium": {"file": "ex03_multiple_tools", "difficulty": "medium", "estimated_minutes": 25},
         },
     },
     4: {
@@ -52,10 +52,10 @@ EXERCISES = {
         "day": 1,
         "difficulty": "medium",
         "estimated_minutes": 30,
-        "file": "ex03_memory",
+        "file": "ex04_memory",
         "variants": {
-            "easy": {"file": "ex03_memory", "difficulty": "easy", "estimated_minutes": 25},
-            "medium": {"file": "ex03_memory", "difficulty": "medium", "estimated_minutes": 30},
+            "easy": {"file": "ex04_memory", "difficulty": "easy", "estimated_minutes": 25},
+            "medium": {"file": "ex04_memory", "difficulty": "medium", "estimated_minutes": 30},
         },
     },
     5: {
@@ -63,10 +63,10 @@ EXERCISES = {
         "day": 1,
         "difficulty": "medium",
         "estimated_minutes": 35,
-        "file": "ex04_state_management",
+        "file": "ex05_state_management",
         "variants": {
-            "easy": {"file": "ex04_state_management", "difficulty": "medium", "estimated_minutes": 30},
-            "medium": {"file": "ex04_state_management", "difficulty": "hard", "estimated_minutes": 35},
+            "easy": {"file": "ex05_state_management", "difficulty": "medium", "estimated_minutes": 30},
+            "medium": {"file": "ex05_state_management", "difficulty": "hard", "estimated_minutes": 35},
         },
     },
     6: {
@@ -74,10 +74,10 @@ EXERCISES = {
         "day": 1,
         "difficulty": "medium",
         "estimated_minutes": 25,
-        "file": "ex05_structured_output",
+        "file": "ex06_structured_output",
         "variants": {
-            "easy": {"file": "ex05_structured_output", "difficulty": "medium", "estimated_minutes": 25},
-            "medium": {"file": "ex05_structured_output", "difficulty": "medium", "estimated_minutes": 25},
+            "easy": {"file": "ex06_structured_output", "difficulty": "medium", "estimated_minutes": 25},
+            "medium": {"file": "ex06_structured_output", "difficulty": "medium", "estimated_minutes": 25},
         },
     },
     7: {
@@ -85,10 +85,10 @@ EXERCISES = {
         "day": 2,
         "difficulty": "medium",
         "estimated_minutes": 40,
-        "file": "ex06_langgraph_parallel",
+        "file": "ex07_langgraph_parallel",
         "variants": {
-            "easy": {"file": "ex06_langgraph_basics", "difficulty": "easy", "estimated_minutes": 35},
-            "medium": {"file": "ex06_langgraph_parallel", "difficulty": "hard", "estimated_minutes": 40},
+            "easy": {"file": "ex07_langgraph_basics", "difficulty": "easy", "estimated_minutes": 35},
+            "medium": {"file": "ex07_langgraph_parallel", "difficulty": "hard", "estimated_minutes": 40},
         },
     },
     8: {
@@ -96,10 +96,10 @@ EXERCISES = {
         "day": 2,
         "difficulty": "medium",
         "estimated_minutes": 45,
-        "file": "ex07_orchestrator_advanced",
+        "file": "ex08_orchestrator_advanced",
         "variants": {
-            "easy": {"file": "ex07_orchestrator", "difficulty": "medium", "estimated_minutes": 40},
-            "medium": {"file": "ex07_orchestrator_advanced", "difficulty": "hard", "estimated_minutes": 45},
+            "easy": {"file": "ex08_orchestrator", "difficulty": "medium", "estimated_minutes": 40},
+            "medium": {"file": "ex08_orchestrator_advanced", "difficulty": "hard", "estimated_minutes": 45},
         },
     },
 }

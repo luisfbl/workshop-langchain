@@ -165,19 +165,19 @@ HINTS = {
         ),
     },
 
-    3: {  # ex03_memory.py ou ex02_multiple_tools.py (depende do nível)
-        # EASY: ex02_multiple_tools (3 tools), ex03_memory (RunnableWithMessageHistory)
-        # MEDIUM: ex02_multiple_tools (3 tools robustas), ex03_memory (SessionStore avançado)
+    3: {  # ex04_memory.py ou ex03_multiple_tools.py (depende do nível)
+        # EASY: ex03_multiple_tools (3 tools), ex04_memory (RunnableWithMessageHistory)
+        # MEDIUM: ex03_multiple_tools (3 tools robustas), ex04_memory (SessionStore avançado)
         1: (
             "💡 Dica 1 (Conceitual):\n\n"
-            "EASY - ex02_multiple_tools:\n"
+            "EASY - ex03_multiple_tools:\n"
             "- Crie 3 tools: list_python_files, read_file, count_lines\n"
             "- O agente vai escolher qual tool usar baseado na pergunta\n\n"
-            "EASY - ex03_memory:\n"
+            "EASY - ex04_memory:\n"
             "- Use RunnableWithMessageHistory para gerenciar conversas\n"
             "- Crie store = {} e função get_session_history(session_id)\n"
             "- Cada sessão tem seu próprio histórico de mensagens\n\n"
-            "MEDIUM - ex03_memory:\n"
+            "MEDIUM - ex04_memory:\n"
             "- Crie SessionStore com metadados (created_at, last_accessed)\n"
             "- Implemente trimming de mensagens antigas\n"
             "- Adicione estatísticas de uso\n\n"
@@ -185,11 +185,11 @@ HINTS = {
         ),
         2: (
             "💡 Dica 2 (Direcional):\n\n"
-            "Para ex02_multiple_tools (EASY):\n"
+            "Para ex03_multiple_tools (EASY):\n"
             "- read_file: use open(file_path, 'r') e retorne conteúdo\n"
             "- count_lines: conte linhas ignorando vazias e comentários\n"
             "- Crie agente com tools = [list_python_files, read_file, count_lines]\n\n"
-            "Para ex03_memory (EASY):\n"
+            "Para ex04_memory (EASY):\n"
             "1. store = {}\n"
             "2. def get_session_history(session_id):\n"
             "       if session_id not in store:\n"
@@ -204,7 +204,7 @@ HINTS = {
         ),
         3: (
             "💡 Dica 3 (Estrutural):\n\n"
-            "ex02_multiple_tools (read_file):\n"
+            "ex03_multiple_tools (read_file):\n"
             "```python\n"
             "@tool\n"
             "def read_file(file_path: str) -> str:\n"
@@ -215,7 +215,7 @@ HINTS = {
             "    except FileNotFoundError:\n"
             "        return f'Erro: Arquivo {file_path} não encontrado'\n"
             "```\n\n"
-            "ex03_memory (EASY):\n"
+            "ex04_memory (EASY):\n"
             "```python\n"
             "from langchain_core.chat_history import InMemoryChatMessageHistory\n"
             "from langchain_core.runnables.history import RunnableWithMessageHistory\n\n"
@@ -236,7 +236,7 @@ HINTS = {
         ),
         4: (
             "💡 Dica 4 (Solução):\n\n"
-            "ex02_multiple_tools - count_lines:\n"
+            "ex03_multiple_tools - count_lines:\n"
             "```python\n"
             "@tool\n"
             "def count_lines(file_path: str) -> str:\n"
@@ -253,7 +253,7 @@ HINTS = {
             "    except FileNotFoundError:\n"
             "        return f'Erro: Arquivo não encontrado.'\n"
             "```\n\n"
-            "ex03_memory - função chat:\n"
+            "ex04_memory - função chat:\n"
             "```python\n"
             "def chat(chat_with_history, session_id: str, message: str) -> str:\n"
             "    response = chat_with_history.invoke(\n"
@@ -265,7 +265,7 @@ HINTS = {
         ),
     },
 
-    4: {  # ex04_state_management.py - State Management
+    4: {  # ex05_state_management.py - State Management
         1: (
             "💡 Dica 1 (Conceitual):\n\n"
             "State Management é diferente de Memory:\n"
@@ -366,7 +366,7 @@ HINTS = {
         ),
     },
 
-    5: {  # ex05_structured_output.py - Saída Estruturada com Pydantic
+    5: {  # ex06_structured_output.py - Saída Estruturada com Pydantic
         1: (
             "💡 Dica 1 (Conceitual):\n\n"
             "Pydantic permite criar dados estruturados e validados.\n"
@@ -474,7 +474,7 @@ HINTS = {
         ),
     },
 
-    6: {  # ex06_langgraph_basics.py - Introdução ao LangGraph
+    6: {  # ex07_langgraph_basics.py - Introdução ao LangGraph
         1: (
             "💡 Dica 1 (Conceitual):\n\n"
             "LangGraph permite criar workflows com múltiplos steps (nodes).\n"
@@ -536,7 +536,7 @@ HINTS = {
         ),
     },
 
-    7: {  # ex07_orchestrator.py - Orquestrador
+    7: {  # ex08_orchestrator.py - Orquestrador
         1: (
             "💡 Dica 1 (Conceitual):\n\n"
             "Um agente orquestrador coordena múltiplos sub-agentes.\n"

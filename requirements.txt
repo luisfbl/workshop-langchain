@@ -1,31 +1,40 @@
-langchain
-langchain-community
-langchain-openai
-langchain-core
-langgraph
-openai
+# LangChain stack - versões mais recentes
+langchain>=1.0.3
+langchain-community>=0.4.1
+langchain-openai>=1.0.2
+langchain-core>=1.0.3
+langchain-text-splitters>=1.0.0
+langgraph>=1.0.2
 
-requests
-git+https://github.com/nhorvath/Pyrebase4.git@master
+# OpenAI
+openai>=1.109.1
 
-pytest
-pytest-asyncio
-pytest-timeout
+# HTTP (para Firebase REST API)
+requests>=2.32.5
 
-watchdog
+# Testing
+pytest>=8.4.2
+pytest-asyncio>=1.2.0
+pytest-timeout>=2.4.0
 
-cryptography
-bcrypt
-argon2-cffi
+# File watching
+watchdog>=6.0.0
 
-rich
-colorama
+# Security
+cryptography>=46.0.3
+bcrypt>=5.0.0
+argon2-cffi>=25.1.0
 
-python-dotenv
-pydantic
-requests
+# UI
+rich>=14.2.0
+colorama>=0.4.6
 
-isort
-pyright
-setuptools
-wheel
+# Utils
+python-dotenv>=1.2.1
+pydantic>=2.12.3
+
+# Development
+isort>=7.0.0
+pyright>=1.1.407
+setuptools>=80.9.0
+wheel>=0.45.1

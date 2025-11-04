@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from exercises.tests.test_helper import import_exercise
 
 # Importa o exercício do nível correto
-ex08 = import_exercise(2, 'ex07_orchestrator_advanced')
+ex08 = import_exercise(2, 'ex08_orchestrator_advanced')
 
 
 class TestOrchestratorStructures:

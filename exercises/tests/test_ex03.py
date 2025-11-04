@@ -1,5 +1,5 @@
 """
-Testes para Exercício 3: Memory com RunnableWithMessageHistory
+Testes para Exercício 3: Múltiplas Tools
 """
 
 import os
@@ -15,156 +15,109 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from exercises.tests.test_helper import import_exercise, get_user_level
 
 # Importa o exercício do nível correto
-ex03 = import_exercise(1, 'ex03_memory')
+ex03 = import_exercise(1, 'ex03_multiple_tools')
 
 
-class TestMemorySetup:
-    """Testes para verificar setup de memory"""
+class TestToolsExist:
+    """Testes para verificar se as tools existem"""
 
-    def test_store_exists(self):
-        """Verifica se o store existe"""
-        assert hasattr(ex03, 'store')
-        # No easy é dict, no medium é SessionStore
-        level = get_user_level()
-        if level == 'easy':
-            assert isinstance(ex03.store, dict)
-        else:
-            # Medium: verifica se tem os métodos necessários
-            assert hasattr(ex03.store, 'get_session')
-            assert hasattr(ex03.store, 'list_sessions')
+    def test_list_python_files_exists(self):
+        """Verifica se list_python_files existe"""
+        assert hasattr(ex03, 'list_python_files')
 
-    def test_get_session_history_exists(self):
-        """Verifica se get_session_history existe"""
-        # Easy tem função get_session_history, Medium tem no SessionStore
-        level = get_user_level()
-        if level == 'easy':
-            assert hasattr(ex03, 'get_session_history')
-            assert callable(ex03.get_session_history)
-        else:
-            # Medium: verifica métodos do SessionStore
-            assert hasattr(ex03.store, 'get_session')
-            assert callable(ex03.store.get_session)
+    def test_read_file_exists(self):
+        """Verifica se read_file existe"""
+        assert hasattr(ex03, 'read_file')
 
-    def test_create_chat_with_history_exists(self):
-        """Verifica se create_chat_with_history existe"""
-        assert hasattr(ex03, 'create_chat_with_history')
-        assert callable(ex03.create_chat_with_history)
+    def test_count_lines_exists(self):
+        """Verifica se count_lines existe"""
+        assert hasattr(ex03, 'count_lines')
+
+    def test_create_multi_tool_agent_exists(self):
+        """Verifica se create_multi_tool_agent existe"""
+        assert hasattr(ex03, 'create_multi_tool_agent')
+        assert callable(ex03.create_multi_tool_agent)
 
 
-class TestChatWithHistory:
-    """Testes para o chat com histórico"""
+class TestToolFunctions:
+    """Testes para as funções das tools"""
 
-    def test_chat_creation(self):
-        """Verifica se o chat é criado"""
-        chat = ex03.create_chat_with_history()
-        assert chat is not None
+    def test_list_python_files_tool(self):
+        """Testa a tool list_python_files"""
+        # Testa com diretório que existe
+        result = ex03.list_python_files.invoke({"directory": "./sample_project"})
+        assert isinstance(result, str)
+        # Deve encontrar pelo menos calculator.py
+        assert "calculator.py" in result or "Nenhum arquivo" in result
+
+    def test_read_file_tool(self):
+        """Testa a tool read_file"""
+        # Cria um arquivo temporário para teste
+        test_file = Path("test_temp.py")
+        test_content = "# Test file\nprint('hello')\n"
+        test_file.write_text(test_content)
+        
+        try:
+            result = ex03.read_file.invoke({"file_path": str(test_file)})
+            assert isinstance(result, str)
+            assert "Test file" in result
+        finally:
+            test_file.unlink()
+
+    def test_read_file_not_found(self):
+        """Testa read_file com arquivo inexistente"""
+        result = ex03.read_file.invoke({"file_path": "arquivo_que_nao_existe.py"})
+        assert "Erro" in result or "não encontrado" in result
+
+    def test_count_lines_tool(self):
+        """Testa a tool count_lines"""
+        # Cria um arquivo temporário para teste
+        test_file = Path("test_temp.py")
+        test_content = """# Comment
+print('hello')
+
+# Another comment
+print('world')
+"""
+        test_file.write_text(test_content)
+        
+        try:
+            result = ex03.count_lines.invoke({"file_path": str(test_file)})
+            assert isinstance(result, str)
+            # Deve contar 2 linhas de código (ignora comentários e vazias)
+            assert "2" in result
+        finally:
+            test_file.unlink()
+
+
+class TestAgentCreation:
+    """Testes para criação do agente"""
+
+    def test_agent_creation(self):
+        """Verifica se o agente é criado"""
+        agent = ex03.create_multi_tool_agent()
+        assert agent is not None
 
     @pytest.mark.skipif(not os.getenv("OPENAI_API_KEY"), reason="Requer OPENAI_API_KEY")
-    def test_single_session_memory(self):
-        """Testa se o chat mantém memória em uma sessão"""
-        print("\n" + "="*70)
-        print("🧪 TESTE: Memory em uma sessão")
-        print("="*70)
-
-        chat_with_history = ex03.create_chat_with_history()
-        session_id = "test_session_1"
-
-        # Primeira mensagem
-        print("\n👤 Mensagem 1: Meu nome é João")
-        response1 = ex03.chat(chat_with_history, session_id, "Meu nome é João")
-        print(f"🤖 Resposta: {response1}")
-
-        # Segunda mensagem - deve lembrar do nome
-        print("\n👤 Mensagem 2: Qual é meu nome?")
-        response2 = ex03.chat(chat_with_history, session_id, "Qual é meu nome?")
-        print(f"🤖 Resposta: {response2}")
-        print("="*70)
-
-        # Verifica se o nome aparece na resposta
-        assert "joão" in response2.lower() or "joao" in response2.lower()
-
-    @pytest.mark.skipif(not os.getenv("OPENAI_API_KEY"), reason="Requer OPENAI_API_KEY")
-    def test_multiple_sessions_isolation(self):
-        """Testa se sessões diferentes são isoladas"""
-        print("\n" + "="*70)
-        print("🧪 TESTE: Isolamento entre sessões")
-        print("="*70)
-
-        chat_with_history = ex03.create_chat_with_history()
-
-        # Sessão 1
-        print("\n👤 Sessão 1: Meu nome é Alice")
-        r1 = ex03.chat(chat_with_history, "session_alice", "Meu nome é Alice")
-        print(f"🤖 Resposta: {r1}")
-
-        # Sessão 2
-        print("\n👤 Sessão 2: Meu nome é Bob")
-        r2 = ex03.chat(chat_with_history, "session_bob", "Meu nome é Bob")
-        print(f"🤖 Resposta: {r2}")
-
-        # Voltar para sessão 1
-        print("\n👤 Sessão 1: Qual é meu nome?")
-        r3 = ex03.chat(chat_with_history, "session_alice", "Qual é meu nome?")
-        print(f"🤖 Resposta: {r3}")
-        print("="*70)
-
-        # Deve lembrar de Alice, não de Bob
-        assert "alice" in r3.lower()
-        assert "bob" not in r3.lower()
-
-
-class TestMediumFeatures:
-    """Testes específicos para recursos do nível Medium"""
-
-    def test_session_store_methods(self):
-        """Testa métodos do SessionStore (apenas Medium)"""
-        level = get_user_level()
-        if level != 'medium':
-            pytest.skip("Teste apenas para nível Medium")
-
-        # Verifica se SessionStore tem todos os métodos necessários
-        assert hasattr(ex03.store, 'get_session')
-        assert hasattr(ex03.store, 'get_session_info')
-        assert hasattr(ex03.store, 'list_sessions')
-        assert hasattr(ex03.store, 'delete_session')
-
-    def test_session_metadata(self):
-        """Testa se metadados são criados (apenas Medium)"""
-        level = get_user_level()
-        if level != 'medium':
-            pytest.skip("Teste apenas para nível Medium")
-
-        # Limpa sessões existentes
-        for sid in ex03.store.list_sessions():
-            ex03.store.delete_session(sid)
-
-        # Cria uma sessão
-        ex03.store.get_session("test_metadata")
-
-        # Verifica metadados
-        info = ex03.store.get_session_info("test_metadata")
-        assert info is not None
-        assert 'created_at' in info
-        assert 'last_accessed' in info
-        assert 'message_count' in info
-
-    def test_session_deletion(self):
-        """Testa remoção de sessões (apenas Medium)"""
-        level = get_user_level()
-        if level != 'medium':
-            pytest.skip("Teste apenas para nível Medium")
-
-        # Cria e deleta sessão
-        ex03.store.get_session("test_delete")
-        assert "test_delete" in ex03.store.list_sessions()
-
-        result = ex03.store.delete_session("test_delete")
-        assert result is True
-        assert "test_delete" not in ex03.store.list_sessions()
-
-        # Tentar deletar novamente deve retornar False
-        result = ex03.store.delete_session("test_delete")
-        assert result is False
+    @pytest.mark.timeout(30)
+    def test_agent_uses_tools(self):
+        """Testa se o agente usa as tools corretamente"""
+        agent = ex03.create_multi_tool_agent()
+        
+        # Cria arquivo de teste
+        test_file = Path("test_agent.py")
+        test_file.write_text("print('test')\n")
+        
+        try:
+            # Testa se o agente lista arquivos
+            response = agent.invoke({
+                "messages": [{"role": "user", "content": "Liste arquivos Python no diretório atual"}]
+            })
+            assert response is not None
+            
+        finally:
+            if test_file.exists():
+                test_file.unlink()
 
 
 if __name__ == "__main__":
