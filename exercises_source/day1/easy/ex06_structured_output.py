@@ -198,7 +198,7 @@ def test_structured_output():
 
                 print(f"\n Funções encontradas:")
                 for func in data.get('functions', []):
-                    status = "" if func.get('has_docstring') else ""
+                    status = "[+]" if func.get('has_docstring') else "[-]"
                     print(f"  {status} {func.get('name')}({', '.join(func.get('args', []))})")
 
             else:

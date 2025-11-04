@@ -188,7 +188,7 @@ class ProgressTracker:
                 self._save_cache()
                 return progress
         except Exception as e:
-            console.print(f"[yellow]  Erro ao carregar do Firebase, usando cache local: {e}[/yellow]")
+            console.print(f"[yellow]Erro ao carregar do Firebase, usando cache local: {e}[/yellow]")
 
         return self.local_cache or self._get_default_progress()
 
@@ -230,13 +230,13 @@ class ProgressTracker:
 
             self._show_completion_message(exercise_num)
         except Exception as e:
-            console.print(f"[red] Erro ao marcar exercício completo: {e}[/red]")
+            console.print(f"[red]Erro ao marcar exercício completo: {e}[/red]")
 
     def increment_attempt(self, exercise_num: int):
         try:
             self.firebase.increment_attempt(self.user_id, exercise_num)
         except Exception as e:
-            console.print(f"[yellow]  Erro ao incrementar tentativas: {e}[/yellow]")
+            console.print(f"[yellow]Erro ao incrementar tentativas: {e}[/yellow]")
 
     def save_test_result(self, exercise_num: int, passed: bool):
         try:
@@ -246,7 +246,7 @@ class ProgressTracker:
             if passed:
                 self.mark_complete(exercise_num)
         except Exception as e:
-            console.print(f"[yellow]  Erro ao salvar resultado: {e}[/yellow]")
+            console.print(f"[yellow]Erro ao salvar resultado: {e}[/yellow]")
 
     def _show_completion_message(self, exercise_num: int):
         try:
@@ -259,14 +259,14 @@ class ProgressTracker:
         completed_count = len(progress.get("completed_exercises", []))
         total = len(EXERCISES)
 
-        message = f"[bold green] Parabéns! Você completou: {ex_name}[/bold green]\n\n"
+        message = f"[bold green]Parabéns! Você completou: {ex_name}[/bold green]\n\n"
         message += f"Progresso: {completed_count}/{total} exercícios completos"
 
         if completed_count == total:
-            message += "\n\n[bold yellow] WORKSHOP COMPLETO! [/bold yellow]"
+            message += "\n\n[bold yellow]WORKSHOP COMPLETO![/bold yellow]"
             message += "\nVocê dominou LangChain Agents!"
         elif exercise_num == 6:
-            message += "\n\n[bold cyan] Dia 1 completo! [/bold cyan]"
+            message += "\n\n[bold cyan]Dia 1 completo![/bold cyan]"
             message += "\nVamos para os exercícios avançados do Dia 2!"
 
         console.print(Panel(message, border_style="green", padding=1))
@@ -275,7 +275,7 @@ class ProgressTracker:
         progress = self.get_progress()
 
         console.print("\n" + "="*60)
-        console.print("[bold cyan] SEU PROGRESSO[/bold cyan]")
+        console.print("[bold cyan]SEU PROGRESSO[/bold cyan]")
         console.print("="*60 + "\n")
 
         current_ex = progress.get("current_exercise", 1)
@@ -299,13 +299,13 @@ class ProgressTracker:
             ex_info = self.get_exercise_info(ex_num)
 
             if ex_num in completed:
-                status = "[green] Completo[/green]"
+                status = "[green][+] Completo[/green]"
             elif ex_num == current_ex:
-                status = "[yellow]  Atual[/yellow]"
+                status = "[yellow][>] Atual[/yellow]"
             elif self.can_access_exercise(ex_num):
-                status = "[cyan] Disponível[/cyan]"
+                status = "[cyan][ ] Disponível[/cyan]"
             else:
-                status = "[dim] Bloqueado[/dim]"
+                status = "[dim][X] Bloqueado[/dim]"
 
             # Tentativas
             attempts = progress.get("exercise_attempts", {}).get(str(ex_num), 0)
@@ -331,7 +331,7 @@ class ProgressTracker:
             console.print("[dim]Você ainda não usou nenhuma dica.[/dim]\n")
             return
 
-        console.print("\n[bold] Dicas Usadas:[/bold]\n")
+        console.print("\n[bold]Dicas Usadas:[/bold]\n")
 
         for ex_str, levels in hints_used.items():
             ex_num = int(ex_str)
@@ -347,7 +347,7 @@ class ProgressTracker:
         progress = self.get_progress()
 
         console.print("\n" + "="*60)
-        console.print("[bold cyan] ESTATÍSTICAS[/bold cyan]")
+        console.print("[bold cyan]ESTATÍSTICAS[/bold cyan]")
         console.print("="*60 + "\n")
 
         start_time = progress.get("start_time")
@@ -414,6 +414,6 @@ class ProgressTracker:
             output_path = Path(f"progress_report_{self.user_id}.json")
 
         output_path.write_text(json.dumps(report, indent=2))
-        console.print(f"[green] Relatório exportado: {output_path}[/green]")
+        console.print(f"[green]Relatório exportado: {output_path}[/green]")
 
         return report

@@ -278,8 +278,8 @@ def test_structured_output():
 
             print(f"\nDetalhes das funções:")
             for func in validated.functions:
-                privacy = "" if func.is_private else ""
-                docs = "" if func.has_docstring else ""
+                privacy = "[P]" if func.is_private else "   "
+                docs = "[+]" if func.has_docstring else "[-]"
                 print(f"  {privacy} {docs} {func.name} (linha {func.line_number})")
 
         except Exception as e:
