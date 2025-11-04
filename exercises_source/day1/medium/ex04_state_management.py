@@ -1,11 +1,11 @@
 """
-Exercicio 4 - State Management Avancado (MEDIUM)
+Exercicio 4 - State Management Avançado (MEDIUM)
 =================================================
 
 OBJETIVO: Criar sistema de state management com metricas de qualidade de codigo
          e pipeline de processamento com multiplas etapas.
 
-TEMPO: 25 minutos
+TEMPO: 20 minutos
 
 O QUE VOCE VAI IMPLEMENTAR:
 - State complexo com metricas de qualidade
@@ -41,26 +41,20 @@ class FileMetrics:
     num_functions: int
     num_classes: int
     functions_with_docstrings: int
-    comment_lines: int
-    complexity_score: float  # 0-10
+    complexity_score: float  # 0-10 (simplificado)
     quality_score: float  # 0-100
 
 
 class QualityState(TypedDict):
-    """State para pipeline de analise de qualidade.
-
-    Este state e mais complexo que o do exercicio EASY!
-    """
     # Files to scan
-    files_to_scan: List[str]
-    files_scanned: List[str]
+    files_to_scan: list[str]
+    files_scanned: list[str]
 
     # Current processing
     current_file: str
-    current_stage: str  # 'scan', 'analyze', 'report'
 
     # Individual metrics
-    file_metrics: Dict[str, FileMetrics]  # filepath -> metrics
+    file_metrics: dict[str, FileMetrics]  # filepath -> metrics
 
     # Aggregated metrics
     total_files: int
@@ -68,13 +62,9 @@ class QualityState(TypedDict):
     total_functions: int
     avg_quality_score: float
 
-    # Priority queue (files sorted by size/importance)
-    high_priority: List[str]
-    low_priority: List[str]
-
     # Errors and warnings
-    errors: List[str]
-    warnings: List[str]
+    errors: list[str]
+    warnings: list[str]
 
 
 # ============================================================================
@@ -107,10 +97,8 @@ def calculate_quality_score(metrics: FileMetrics) -> float:
     """Calcula score de qualidade geral (0-100).
 
     Considera:
-    - Cobertura de docstrings (40%)
-    - Baixa complexidade (30%)
-    - Razao comentarios/codigo (20%)
-    - Tamanho das funcoes (10%)
+    - Cobertura de docstrings (60%)
+    - Baixa complexidade (40%)
 
     Args:
         metrics: Metricas do arquivo
@@ -118,25 +106,19 @@ def calculate_quality_score(metrics: FileMetrics) -> float:
     Returns:
         Score 0-100
     """
-    # TODO: Implementar formula de qualidade
+    # TODO: Implementar formula de qualidade simplificada
 
-    # Docstring coverage
-    docstring_coverage = 0
-    if metrics.num_functions > 0:
-        docstring_coverage = (metrics.functions_with_docstrings / metrics.num_functions) * 40
+    # Docstring coverage (60 pontos)
+    docstring_score = 0
+    if metrics.num_functions + metrics.num_classes > 0:
+        total_items = metrics.num_functions + metrics.num_classes
+        docstring_score = (metrics.functions_with_docstrings / total_items) * 60
 
-    # TODO: Calcular outros componentes
+    # Complexity (40 pontos - inverse: less is better)
+    # TODO: Calcule complexity_points = (10 - metrics.complexity_score) * 4
+    complexity_points = 0
 
-    # Complexity (inverse - less is better)
-    complexity_score = (10 - metrics.complexity_score) * 3  # 0-30 points
-
-    # TODO: Comment ratio
-    comment_ratio = 0
-
-    # TODO: Function size penalty
-    size_penalty = 0
-
-    total_score = docstring_coverage + complexity_score + comment_ratio - size_penalty
+    total_score = docstring_score + complexity_points
 
     return max(0, min(100, total_score))
 
@@ -151,25 +133,28 @@ def analyze_file(file_path: str) -> FileMetrics:
         FileMetrics com todas as metricas
     """
     # TODO: Implementar analise completa
-    # DICA: Use ast.parse, ast.walk, contador de linhas, etc.
 
     with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
         lines = content.split('\n')
         tree = ast.parse(content)
 
-    # TODO: Conte funcoes, classes, docstrings, comentarios
+    # TODO: Conte funcoes, classes e docstrings usando ast.walk()
     num_functions = 0
     num_classes = 0
     functions_with_docstrings = 0
-    comment_lines = 0
 
-    for node in ast.walk(tree):
-        # TODO: Implemente contagem
-        pass
+    # TODO: Implemente loop para contar
+    # for node in ast.walk(tree):
+    #     if isinstance(node, ast.FunctionDef):
+    #         num_functions += 1
+    #         if ast.get_docstring(node):
+    #             functions_with_docstrings += 1
+    #     elif isinstance(node, ast.ClassDef):
+    #         num_classes += 1
 
-    # TODO: Calcule complexidade
-    complexity = calculate_complexity(tree)
+    # TODO: Calcule complexidade chamando calculate_complexity(tree)
+    complexity = 0  # TODO: calculate_complexity(tree)
 
     # Criar metrics
     metrics = FileMetrics(
@@ -178,13 +163,12 @@ def analyze_file(file_path: str) -> FileMetrics:
         num_functions=num_functions,
         num_classes=num_classes,
         functions_with_docstrings=functions_with_docstrings,
-        comment_lines=comment_lines,
         complexity_score=complexity,
-        quality_score=0  # Sera calculado depois
+        quality_score=0
     )
 
-    # Calcular quality score
-    metrics.quality_score = calculate_quality_score(metrics)
+    # TODO: Calcule quality score usando calculate_quality_score(metrics)
+    metrics.quality_score = 0  # TODO: calculate_quality_score(metrics)
 
     return metrics
 
@@ -194,33 +178,22 @@ def analyze_file(file_path: str) -> FileMetrics:
 # ============================================================================
 
 def initialize_quality_state(directory: str) -> QualityState:
-    """Inicializa state e classifica arquivos por prioridade."""
+    """Inicializa state com lista de arquivos Python."""
 
+    # TODO: Buscar arquivos Python no diretorio
     path = Path(directory)
-    python_files = [str(f) for f in path.glob("*.py")]
+    python_files = None  # TODO: [str(f) for f in path.glob("*.py")]
 
-    # TODO: Classificar arquivos por prioridade
-    # Arquivos maiores ou com 'main' no nome = high priority
-    high_priority = []
-    low_priority = []
-
-    for file_path in python_files:
-        # TODO: Criterio de prioridade
-        # DICA: Tamanho do arquivo, ou nome especial
-        pass
-
+    # TODO: Criar state inicial
     state: QualityState = {
         "files_to_scan": python_files,
         "files_scanned": [],
         "current_file": "",
-        "current_stage": "scan",
         "file_metrics": {},
-        "total_files": len(python_files),
+        "total_files": len(python_files) if python_files else 0,
         "total_lines": 0,
         "total_functions": 0,
         "avg_quality_score": 0.0,
-        "high_priority": high_priority,
-        "low_priority": low_priority,
         "errors": [],
         "warnings": []
     }
@@ -228,8 +201,8 @@ def initialize_quality_state(directory: str) -> QualityState:
     return state
 
 
-def process_file_stage(state: QualityState) -> QualityState:
-    """Processa arquivo atual: scan -> analyze -> next file.
+def process_next_file(state: QualityState) -> QualityState:
+    """Processa proximo arquivo e atualiza state.
 
     Args:
         state: State atual
@@ -237,54 +210,44 @@ def process_file_stage(state: QualityState) -> QualityState:
     Returns:
         State atualizado
     """
-    # TODO: Implementar pipeline
-
-    # Se nao ha arquivos, retornar
+    # TODO: Verificar se ha arquivos para processar
     if not state["files_to_scan"]:
-        state["current_stage"] = "complete"
         return state
 
-    # Pegar proximo arquivo (prioridade: high primeiro)
-    if state["high_priority"]:
-        current = state["high_priority"].pop(0)
-    elif state["low_priority"]:
-        current = state["low_priority"].pop(0)
-    else:
-        current = state["files_to_scan"].pop(0)
-
+    # TODO: Pegar proximo arquivo
+    current = state["files_to_scan"][0]
     state["current_file"] = current
-    state["current_stage"] = "analyzing"
 
     print(f"\nAnalisando: {Path(current).name}")
 
     try:
-        # TODO: Analisar arquivo
-        metrics = analyze_file(current)
+        # TODO: Analisar arquivo chamando analyze_file()
+        metrics = None  # TODO: analyze_file(current)
 
         # TODO: Adicionar metricas ao state
-        state["file_metrics"][current] = metrics
+        # state["file_metrics"][current] = metrics
 
-        # TODO: Atualizar agregados
-        state["total_lines"] += metrics.lines_of_code
-        state["total_functions"] += metrics.num_functions
+        # TODO: Atualizar agregados (total_lines, total_functions)
+        # state["total_lines"] += metrics.lines_of_code
+        # state["total_functions"] += metrics.num_functions
 
-        # TODO: Adicionar warnings se qualidade baixa
-        if metrics.quality_score < 50:
-            state["warnings"].append(
-                f"{Path(current).name}: Qualidade baixa ({metrics.quality_score:.1f})"
-            )
+        # TODO: Adicionar warning se qualidade < 50
+        # if metrics.quality_score < 50:
+        #     state["warnings"].append(f"{Path(current).name}: Qualidade baixa")
 
-        # Mover para processados
-        state["files_scanned"].append(current)
+        # TODO: Mover arquivo para scanned e remover de to_scan
+        # state["files_scanned"].append(current)
+        # state["files_to_scan"].pop(0)
 
         print(f"  Qualidade: {metrics.quality_score:.1f}/100")
         print(f"  Complexidade: {metrics.complexity_score:.1f}/10")
 
     except Exception as e:
-        state["errors"].append(f"{current}: {str(e)}")
+        # TODO: Tratar erro
+        # state["errors"].append(f"{current}: {str(e)}")
+        # state["files_to_scan"].pop(0)
         print(f"  Erro: {e}")
 
-    state["current_stage"] = "scan"
     return state
 
 
@@ -360,16 +323,16 @@ def run_quality_pipeline(directory: str) -> QualityState:
     """
     print("\n=== ANALISE DE QUALIDADE ===\n")
 
-    # TODO: Inicializar
-    state = initialize_quality_state(directory)
+    # TODO: Inicializar state
+    state = None  # TODO: initialize_quality_state(directory)
 
-    print(f"Arquivos: {state['total_files']} (high: {len(state['high_priority'])}, low: {len(state['low_priority'])})\n")
+    print(f"Arquivos encontrados: {state['total_files']}\n")
 
-    # TODO: Processar todos os arquivos
-    while state["files_to_scan"] or state["high_priority"] or state["low_priority"]:
-        state = process_file_stage(state)
+    # TODO: Processar todos os arquivos usando loop while
+    # while state["files_to_scan"]:
+    #     state = process_next_file(state)
 
-    # TODO: Gerar relatorio
+    # Gerar relatorio
     report = generate_quality_report(state)
     print(report)
 
@@ -377,7 +340,8 @@ def run_quality_pipeline(directory: str) -> QualityState:
 
 
 # ============================================================================
-# Testes (NAO MODIFIQUE)
+# Teste local (use para testar seu código)
+# Use o comando `run` para executar o teste
 # ============================================================================
 
 def test_quality_pipeline():

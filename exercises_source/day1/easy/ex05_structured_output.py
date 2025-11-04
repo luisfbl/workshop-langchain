@@ -147,7 +147,8 @@ def create_structured_agent():
 
 
 # ============================================================================
-# Testes (NÃO MODIFIQUE)
+# Teste local (use para testar seu código)
+# Use o comando `run` para executar o teste
 # ============================================================================
 
 def test_structured_output():

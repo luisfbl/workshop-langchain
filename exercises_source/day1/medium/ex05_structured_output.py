@@ -4,7 +4,7 @@ Exercício 5 - Pydantic Avançado e Validações (MEDIUM)
 
 OBJETIVO: Dominar Pydantic para dados estruturados robustos.
 
-TEMPO: 20 minutos
+TEMPO: 15 minutos
 
 O QUE VOCÊ VAI APRENDER:
 - Pydantic models com validações
@@ -20,9 +20,7 @@ incluindo validações, scores calculados e estruturas aninhadas.
 # I AM NOT DONE
 
 from pathlib import Path
-from typing import List, Optional
-from pydantic import BaseModel, Field, field_validator
-from pydantic_core import ValidationInfo
+from pydantic import BaseModel, Field, ValidationInfo, field_validator
 from langchain.agents import create_agent
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
@@ -237,7 +235,8 @@ def create_structured_agent():
 
 
 # ============================================================================
-# Testes (NÃO MODIFIQUE)
+# Teste local (use para testar seu código)
+# Use o comando `run` para executar o teste
 # ============================================================================
 
 def test_structured_output():

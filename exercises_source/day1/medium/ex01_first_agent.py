@@ -4,7 +4,7 @@ Exercício 1 - Seu Primeiro Agente LangChain (MEDIUM)
 
 OBJETIVO: Criar um agente conversacional básico e entender o padrão ReAct.
 
-TEMPO: 15 minutos
+TEMPO: 5 minutos
 
 O QUE VOCÊ VAI APRENDER:
 - Inicializar e configurar um LLM
@@ -44,14 +44,10 @@ def create_basic_agent():
     """
     TODO: Implemente a criação completa do agente:
 
-    1. Criar LLM
-    2. Criar lista de tools (vazia por enquanto)
-    3. Criar agente com create_agent()
+    1. Criar LLM usando a função create_llm()
+    2. Criar agente com create_agent()
 
     Retorne: Agente compilado (CompiledStateGraph)
-
-    NOTA: Na API LangChain 1.0+, create_agent() substitui create_react_agent()
-    e não precisa mais de AgentExecutor ou prompt do hub.
     """
     pass
 

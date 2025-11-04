@@ -4,7 +4,7 @@ Exercício 2 - Primeira Tool Customizada (MEDIUM)
 
 OBJETIVO: Criar uma tool robusta e observar o padrão ReAct em ação.
 
-TEMPO: 20 minutos
+TEMPO: 15 minutos
 
 O QUE VOCÊ VAI APRENDER:
 - Criar tools com tratamento de erros
@@ -86,7 +86,8 @@ def experiment_with_docstrings():
 
 
 # ============================================================================
-# Testes (NÃO MODIFIQUE)
+# Teste local (use para testar seu código)
+# Use o comando `run` para executar o teste
 # ============================================================================
 
 def test_agent():

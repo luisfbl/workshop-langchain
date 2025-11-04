@@ -42,16 +42,15 @@ class AnalysisState(TypedDict):
     """State para trackear analise de multiplos arquivos.
 
     TypedDict garante type safety e autocomplete.
+
+    TODO 1.1: Complete a definição do TypedDict abaixo com os campos necessários.
+    Já fornecemos files_to_process como exemplo.
     """
-    # TODO 1.1: Adicione os campos do state:
-
-    # files_to_process: Lista de arquivos que ainda precisam ser analisados
-    files_to_process: list[str]  # Ja feito como exemplo
-
+    files_to_process: list[str]  # Arquivos que ainda precisam ser analisados
     # TODO: Adicione os outros campos:
     # files_processed: list[str]  # Arquivos ja processados
     # current_file: str  # Arquivo sendo processado agora
-    # total_functions: int  # Total de funcoes encontradas ate agora
+    # total_functions: int  # Total de funcoes encontradas
     # total_lines: int  # Total de linhas de codigo
     # errors: list[str]  # Lista de erros encontrados
 
@@ -69,15 +68,17 @@ def initialize_state(directory: str) -> AnalysisState:
     Returns:
         State inicial com files_to_process populado
     """
-    # TODO 2.1: Usar list_python_files ou buscar arquivos diretamente
+    # TODO 2.1: Buscar arquivos Python e criar state inicial
+    # DICA: Use Path(directory).glob("*.py") para buscar arquivos
+    # DICA: Converta para lista de strings: [str(f) for f in path.glob("*.py")]
     path = Path(directory)
-    python_files = [str(f) for f in path.glob("*.py")]
+    python_files = None  # TODO: Substitua por lista de arquivos .py como strings
 
-    # TODO 2.2: Criar e retornar state inicial
-    # DICA: Todos os contadores comecam em 0, listas vazias
+    # TODO 2.2: Preencha o state com os valores iniciais
+    # DICA: Listas vazias [], strings vazias "", números = 0
     state: AnalysisState = {
         "files_to_process": python_files,
-        # TODO: Preencha os outros campos
+        # TODO: Adicione os outros campos aqui com valores iniciais
         # "files_processed": [],
         # "current_file": "",
         # "total_functions": 0,
@@ -85,7 +86,7 @@ def initialize_state(directory: str) -> AnalysisState:
         # "errors": []
     }
 
-    return None  # TODO: Retornar state
+    return state
 
 
 def process_next_file(state: AnalysisState) -> AnalysisState:
@@ -104,49 +105,43 @@ def process_next_file(state: AnalysisState) -> AnalysisState:
         State atualizado
     """
     # TODO 2.3: Verificar se ha arquivos para processar
+    # Se lista vazia, retorne state sem modificar
     if not state["files_to_process"]:
-        print("Aviso: Nenhum arquivo para processar!")
         return state
 
-    # TODO 2.4: Pegar primeiro arquivo da fila
+    # TODO 2.4: Pegar primeiro arquivo e atualizar current_file
     current = None  # TODO: state["files_to_process"][0]
-
-    # TODO 2.5: Atualizar current_file no state
-    # state["current_file"] = current
+    # TODO: state["current_file"] = current
 
     print(f"\nProcessando: {current}")
 
     try:
-        # TODO 2.6: Ler e analisar arquivo
-        with open(current, 'r', encoding='utf-8') as f:
-            content = f.read()
-            tree = ast.parse(content)
+        # TODO 2.5: Ler arquivo e parsear com AST
+        # TODO: Abra o arquivo, leia content e faça ast.parse(content)
+        content = None  # TODO: Implementar leitura
+        tree = None  # TODO: ast.parse(content)
 
-        # TODO 2.7: Contar funcoes e linhas
-        num_functions = 0  # TODO: Conte funcoes com ast.walk
-        num_lines = 0  # TODO: len(content.split('\n'))
-
-        # TODO: Implementar contagem
-        # DICA: for node in ast.walk(tree):
-        #           if isinstance(node, ast.FunctionDef):
-        #               num_functions += 1
+        # TODO 2.6: Contar funcoes e linhas
+        # DICA 1: Para funcoes, use ast.walk(tree) e conte isinstance(node, ast.FunctionDef)
+        # DICA 2: Para linhas, use len(content.split('\n'))
+        num_functions = 0  # TODO: Implemente contagem de funcoes
+        num_lines = 0  # TODO: Implemente contagem de linhas
 
         print(f"  Funcoes: {num_functions}")
         print(f"  Linhas: {num_lines}")
 
-        # TODO 2.8: Atualizar contadores no state
+        # TODO 2.7: Atualizar state com resultados
+        # Incremente os contadores e mova o arquivo de to_process para processed
         # state["total_functions"] += num_functions
         # state["total_lines"] += num_lines
-
-        # TODO 2.9: Mover arquivo de to_process para processed
         # state["files_processed"].append(current)
         # state["files_to_process"].pop(0)
 
     except Exception as e:
         print(f"  Erro: {e}")
-        # TODO 2.10: Adicionar erro ao state
+        # TODO 2.8: Tratar erro - adicione ao state["errors"] e remova da fila
         # state["errors"].append(f"{current}: {str(e)}")
-        # state["files_to_process"].pop(0)  # Remove mesmo com erro
+        # state["files_to_process"].pop(0)
 
     return state
 
@@ -160,21 +155,21 @@ def get_state_summary(state: AnalysisState) -> str:
     Returns:
         String formatada com resumo
     """
-    # TODO 2.11: Criar resumo formatado
+    # Ja implementado - apenas retorna resumo formatado
     summary = f"""
 RESUMO DO STATE:
 ==================
-Arquivos processados: {len(state.get('files_processed', []))}
-Arquivos pendentes: {len(state.get('files_to_process', []))}
-Total de funcoes: {state.get('total_functions', 0)}
-Total de linhas: {state.get('total_lines', 0)}
-Erros: {len(state.get('errors', []))}
+Arquivos processados: {len(state['files_processed'])}
+Arquivos pendentes: {len(state['files_to_process'])}
+Total de funcoes: {state['total_functions']}
+Total de linhas: {state['total_lines']}
+Erros: {len(state['errors'])}
 """
 
-    if state.get('current_file'):
+    if state['current_file']:
         summary += f"\nProcessando: {state['current_file']}"
 
-    if state.get('errors'):
+    if state['errors']:
         summary += "\n\nErros encontrados:"
         for error in state['errors']:
             summary += f"\n  - {error}"
@@ -197,18 +192,18 @@ def run_analysis_workflow(directory: str) -> AnalysisState:
     """
     print(f"Analisando: {directory}")
 
-    # TODO 3.1: Inicializar state
+    # TODO 3.1: Inicializar state chamando initialize_state()
     state = None  # TODO: initialize_state(directory)
 
     print(f"Encontrados {len(state['files_to_process'])} arquivos\n")
 
-    # TODO 3.2: Processar todos os arquivos
-    # DICA: Use while state["files_to_process"]:
+    # TODO 3.2: Processar todos os arquivos usando loop while
+    # DICA: while state["files_to_process"]:
     #           state = process_next_file(state)
 
-    # TODO: Implementar loop
+    # TODO: Implementar loop aqui
 
-    # TODO 3.3: Mostrar resumo final
+    # Mostrar resumo final
     print(get_state_summary(state))
 
     return state

@@ -29,7 +29,7 @@ from langchain_openai import ChatOpenAI
 from .ex02_first_tool import list_python_files
 
 # ============================================================================
-# TODO 1: Criar tool read_file robusta
+# TODO 1: Criar tool read_file
 # ============================================================================
 
 @tool
@@ -154,11 +154,11 @@ def experiment_tool_selection():
 
 
 # ============================================================================
-# Testes (NÃO MODIFIQUE)
+# Teste local (use para testar seu código)
+# Use o comando `run` para executar o teste
 # ============================================================================
 
 def test_agent():
-    """Testa o agente com múltiplas tools."""
     try:
         agent = create_multi_tool_agent()
 
