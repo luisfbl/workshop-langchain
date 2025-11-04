@@ -1,5 +1,5 @@
 """
-Exercício 5 - Output Estruturado com Pydantic (EASY)
+Exercício 6 - Output Estruturado com Pydantic (EASY)
 =====================================================
 
 OBJETIVO: Fazer o agente retornar dados estruturados ao invés de texto livre.
