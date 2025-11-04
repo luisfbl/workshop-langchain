@@ -30,66 +30,32 @@ from typing import Any
 from langchain_core.chat_history import BaseChatMessageHistory, InMemoryChatMessageHistory
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_openai import ChatOpenAI
-from langchain_core.messages import BaseMessage, trim_messages
+from langchain_core.messages import BaseMessage, trim_messages, HumanMessage
 
 
 # ============================================================================
-# TODO 1: Criar SessionStore com metadados
+# TODO 1: Criar store simples (dicionário) e função get_session_history
 # ============================================================================
 
-class SessionStore:
-    """Store customizado que adiciona metadados às sessões."""
-
-    def __init__(self):
-        # TODO 1.1: Criar dicionários para armazenar dados
-        self._sessions: dict[str, InMemoryChatMessageHistory] = {}
-        self._metadata: dict[str, dict[str, Any]] = {}  # Metadados por sessão
-
-    def get_session(self, session_id: str) -> InMemoryChatMessageHistory:
-        """Retorna ou cria sessão com metadados.
-
-        Args:
-            session_id: ID da sessão
-
-        Returns:
-            InMemoryChatMessageHistory da sessão
-        """
-        # TODO 1.2: Se sessão não existe, criar nova e adicionar metadados
-        if session_id not in self._sessions:
-            self._sessions[session_id] = None  # TODO: InMemoryChatMessageHistory()
-            self._metadata[session_id] = {
-                "created_at": None,  # TODO: datetime.now()
-                "message_count": 0,
-                "last_accessed": None  # TODO: datetime.now()
-            }
-
-        # TODO 1.3: Atualizar last_accessed com datetime.now()
-
-        return self._sessions[session_id]
-
-    def get_session_info(self, session_id: str) -> dict[str, Any] | None:
-        # TODO 1.4: Retornar metadados + contagem de mensagens
-        if session_id not in self._sessions:
-            return None
-
-        history = self._sessions[session_id]
-        metadata = self._metadata[session_id].copy()
-        metadata["message_count"] = None  # TODO: len(history.messages)
-
-        return metadata
-
-    def list_sessions(self) -> list[str]:
-        return list(self._sessions.keys())
-
-    def delete_session(self, session_id: str) -> bool:
-        if session_id in self._sessions:
-            # TODO 1.5: Remover sessão e seus metadados
-            return True
-        return False
+# TODO 1.1: Criar dicionário vazio para armazenar sessões
+# DICA: store deve ser um dict[str, InMemoryChatMessageHistory]
+store = None  # TODO: criar dicionário vazio
 
 
-# Instância global do store
-store = SessionStore()
+def get_session_history(session_id: str) -> InMemoryChatMessageHistory:
+    """Retorna ou cria histórico para uma sessão.
+    
+    Args:
+        session_id: ID da sessão
+    
+    Returns:
+        InMemoryChatMessageHistory da sessão
+    """
+    # TODO 1.2: Se session_id não existe no store, criar uma nova entrada
+    # com InMemoryChatMessageHistory()
+    
+    # TODO 1.3: Retornar o histórico da sessão
+    pass
 
 
 # ============================================================================
@@ -98,23 +64,26 @@ store = SessionStore()
 
 def create_chat_with_history(max_messages: int | None = None):
     # TODO 2.1: Criar LLM
-    llm = None  # TODO: ChatOpenAI
+    llm = None  # TODO: ChatOpenAI(model="gpt-5-nano", temperature=0)
 
     # TODO 2.2: Se max_messages definido, adicionar trimming
+    runnable = llm
     if max_messages:
-        # DICA: Use trim_messages para limitar o histórico,
-        # veja na documentação para ver o funcionamento
-        # llm_with_trimming = trimmer | llm
+        # DICA: Use trim_messages para limitar o histórico
+        # trimmer = trim_messages(
+        #     max_tokens=max_messages,
+        #     strategy="last",
+        #     token_counter=len
+        # )
+        # runnable = trimmer | llm
         pass
 
     # TODO 2.3: Criar RunnableWithMessageHistory
     chat_with_history = None  # TODO: Implementar
 
     # DICA: RunnableWithMessageHistory(
-    #     runnable=llm,  # ou llm_with_trimming
-    #     get_session_history=lambda session_id: store.get_session(session_id),
-    #     input_messages_key="input",
-    #     history_messages_key="chat_history",
+    #     runnable=runnable,  # ou apenas llm se não usar trimming
+    #     get_session_history=get_session_history,
     # )
 
     return chat_with_history
@@ -126,6 +95,10 @@ def create_chat_with_history(max_messages: int | None = None):
 
 def chat(chat_with_history, session_id: str, message: str) -> str:
     # TODO 3.1: Invocar chat com session_id
+    # DICA: chat_with_history.invoke(
+    #     [HumanMessage(content=message)],
+    #     config={"configurable": {"session_id": session_id}}
+    # )
     response = None  # TODO: Implementar invoke
 
     return response.content if response else ""
@@ -133,30 +106,33 @@ def chat(chat_with_history, session_id: str, message: str) -> str:
 
 def show_session_stats(session_id: str):
     # TODO 3.2: Obter e mostrar informações da sessão
-    info = None  # TODO: store.get_session_info(session_id)
-
-    if not info:
+    # DICA: Verificar se session_id existe no store
+    # DICA: Pegar o histórico do store[session_id]
+    # DICA: Contar mensagens com len(history.messages)
+    
+    if session_id not in store:
         print(f"  Sessão '{session_id}' não existe")
         return
 
+    # TODO: Implementar exibição de estatísticas
     print(f"\n  📊 Estatísticas da sessão '{session_id}':")
     print("  " + "-" * 60)
-    print(f"  Criada em: {info.get('created_at')}")
-    print(f"  Último acesso: {info.get('last_accessed')}")
-    print(f"  Total de mensagens: {info.get('message_count')}")
+    print(f"  Total de mensagens: ???")  # TODO: mostrar contagem real
 
 
 def show_all_sessions():
-    sessions = store.list_sessions()
+    # TODO: Listar todas as chaves do store
+    sessions = list(store.keys())
 
     print(f"\n  📋 Sessões ativas: {len(sessions)}")
     print("  " + "=" * 60)
 
     for session_id in sessions:
-        info = store.get_session_info(session_id)
+        # TODO: Para cada sessão, pegar histórico e contar mensagens
+        history = store[session_id]
+        message_count = len(history.messages)
         print(f"\n  ID: {session_id}")
-        print(f"    Mensagens: {info['message_count']}")
-        print(f"    Último acesso: {info['last_accessed']}")
+        print(f"    Mensagens: {message_count}")
 
 
 # ============================================================================
@@ -241,7 +217,9 @@ def test_session_management():
 
     # Deletar uma sessão
     print("\n  🗑️  Deletando session_1...")
-    store.delete_session("session_1")
+    # TODO: Deletar session_1 do store usando del
+    if "session_1" in store:
+        del store["session_1"]
 
     print("\n  Depois de deletar:")
     show_all_sessions()

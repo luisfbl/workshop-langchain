@@ -226,7 +226,7 @@ def create_structured_agent():
     """Cria agente com tool de análise estruturada.
 
     TODO 4.1: Implemente o agente com:
-    - ChatOpenAI (gpt-4o-mini)
+    - ChatOpenAI (gpt-5-nano)
     - Tool analyze_file_complete
     - create_agent()
     """
@@ -247,7 +247,7 @@ def test_structured_output():
         print("TESTE 1: Análise completa estruturada")
         print("=" * 70)
         response = agent.invoke({
-            "input": "Analise completamente o arquivo ./sample_project/calculator.py"
+            "messages": [{"role": "user", "content": "Analise completamente o arquivo ./sample_project/calculator.py"}]
         })
 
         print(f"\nResposta:\n{response['output']}\n")
@@ -297,7 +297,9 @@ def test_structured_output():
 
         for q in questions:
             print(f"\nPergunta: {q}")
-            r = agent.invoke({"input": q})
+            r = agent.invoke({
+                "messages": [{"role": "user", "content": q}]
+            })
             print(f"Resposta: {r['output']}")
 
     except Exception as e:

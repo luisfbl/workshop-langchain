@@ -23,6 +23,7 @@ from pathlib import Path
 from langchain.agents import create_agent
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
+from langchain_core.prompts import PromptTemplate
 
 # ============================================================================
 # TODO 1: Criar tool robusta de listagem
@@ -59,28 +60,9 @@ def create_agent_with_tool():
 
     Estrutura:
     1. LLM
-    2. Prompt
+    2. Prompt (https://api.python.langchain.com/en/latest/prompts/langchain_core.prompts.prompt.PromptTemplate.html?utm_source=chatgpt.com)
     3. Tools (agora COM list_python_files)
-    4. Agent
-    5. Executor (com verbose=True para ver o raciocínio)
-    """
-    pass
-
-
-# ============================================================================
-# TODO 3: DESAFIO EXTRA - Experimente com a docstring
-# ============================================================================
-
-def experiment_with_docstrings():
-    """
-    OPCIONAL: Crie versões da tool com docstrings diferentes e veja
-    como isso afeta a decisão do agente de quando usar a tool.
-
-    Experimente docstrings:
-    - Muito vagas
-    - Muito específicas
-    - Com exemplos
-    - Sem exemplos
+    4. Agent (com debug=True para ver o raciocínio)
     """
     pass
 
@@ -109,7 +91,9 @@ def test_agent():
             print(f"TESTE: {query}")
             print(f"Expectativa: {expectation}")
             print("=" * 60)
-            response = agent.invoke({"input": query})
+            response = agent.invoke({
+                "messages": [{"role": "user", "content": query}]
+            })
             print(f"Resposta: {response['output']}\n")
 
         print("✅ Todos os testes concluídos!")

@@ -134,7 +134,7 @@ def create_multi_tool_agent():
     - count_lines
     - extract_functions (se implementou)
 
-    Configure com verbose=True para ver as decisões do agente.
+    Configure com debug=True para ver as decisões do agente.
     """
     pass
 
@@ -175,7 +175,9 @@ def test_agent():
             print(f"Tool esperada: {expected}")
             print("=" * 70)
 
-            response = agent.invoke({"input": query})
+            response = agent.invoke({
+                "messages": [{"role": "user", "content": query}]
+            })
             print(f"\nResposta: {response['output']}\n")
 
     except Exception as e:

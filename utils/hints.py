@@ -225,7 +225,7 @@ HINTS = {
             "        store[session_id] = InMemoryChatMessageHistory()\n"
             "    return store[session_id]\n\n"
             "def create_chat_with_history():\n"
-            "    llm = ChatOpenAI(model='gpt-4o-mini', temperature=0)\n"
+            "    llm = ChatOpenAI(model='gpt-5-nano', temperature=0)\n"
             "    return RunnableWithMessageHistory(\n"
             "        runnable=llm,\n"
             "        get_session_history=get_session_history,\n"
@@ -589,7 +589,7 @@ HINTS = {
             "    llm = ChatOpenAI(model='gpt-4', temperature=0)\n"
             "    prompt = hub.pull('hwchase17/react')\n"
             "    agent = create_react_agent(llm, tools, prompt)\n"
-            "    return AgentExecutor(agent=agent, tools=tools, verbose=True)\n"
+            "    return AgentExecutor(agent=agent, tools=tools, debug=True)\n"
             "```"
         ),
     },
