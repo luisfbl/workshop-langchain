@@ -5,21 +5,21 @@ from typing import Any, Dict, List, Optional, Tuple
 HINTS = {
     1: {  # ex01_first_agent.py - Primeiro Agente
         1: (
-            "💡 Dica 1 (Conceitual):\n\n"
+            " Dica 1 (Conceitual):\n\n"
             "Na API LangChain 1.0+, criar um agente é muito mais simples!\n"
             "Você só precisa de:\n"
             "1. Um LLM (ChatOpenAI)\n"
             "2. Uma lista de tools (pode ser vazia [])\n"
             "3. Chamar create_agent(llm, tools)\n\n"
             "O agente retorna um CompiledStateGraph que você usa com .invoke()\n\n"
-            "💡 EASY vs MEDIUM:\n"
+            " EASY vs MEDIUM:\n"
             "- EASY: Foco em completar os TODOs com instruções detalhadas\n"
             "- MEDIUM: Implementar do zero com menos orientação\n\n"
-            "📚 Documentação:\n"
+            " Documentação:\n"
             "https://docs.langchain.com/oss/python/langchain/agents"
         ),
         2: (
-            "💡 Dica 2 (Direcional):\n\n"
+            " Dica 2 (Direcional):\n\n"
             "Para create_llm():\n"
             "- Importe: from langchain_openai import ChatOpenAI\n"
             "- Crie: ChatOpenAI(model='gpt-5-nano', temperature=0)\n"
@@ -33,7 +33,7 @@ HINTS = {
             "IMPORTANTE: Não precisa mais de AgentExecutor ou hub.pull()!"
         ),
         3: (
-            "💡 Dica 3 (Estrutural):\n\n"
+            " Dica 3 (Estrutural):\n\n"
             "```python\n"
             "from langchain.agents import create_agent\n"
             "from langchain_openai import ChatOpenAI\n\n"
@@ -57,7 +57,7 @@ HINTS = {
             "```"
         ),
         4: (
-            "💡 Dica 4 (Solução Completa):\n\n"
+            " Dica 4 (Solução Completa):\n\n"
             "```python\n"
             "from langchain.agents import create_agent\n"
             "from langchain_openai import ChatOpenAI\n\n"
@@ -82,19 +82,19 @@ HINTS = {
 
     2: {  # ex02_first_tool.py - Primeira Tool
         1: (
-            "💡 Dica 1 (Conceitual):\n\n"
+            " Dica 1 (Conceitual):\n\n"
             "Tools são funções Python que o agente pode chamar.\n"
             "Use o decorator @tool para transformar uma função em tool.\n\n"
             "A docstring é CRUCIAL - o LLM lê ela para decidir quando usar a tool!\n"
             "Seja específico sobre QUANDO usar a ferramenta.\n\n"
-            "💡 EASY vs MEDIUM:\n"
+            " EASY vs MEDIUM:\n"
             "- EASY: Complete a tool list_python_files e retorne string formatada\n"
             "- MEDIUM: Implemente com tratamento de erros robusto\n\n"
-            "📚 Documentação:\n"
+            " Documentação:\n"
             "https://python.langchain.com/docs/concepts/tools"
         ),
         2: (
-            "💡 Dica 2 (Direcional):\n\n"
+            " Dica 2 (Direcional):\n\n"
             "Para list_python_files:\n"
             "1. Importe: from langchain.tools import tool\n"
             "2. Importe: from pathlib import Path\n"
@@ -109,7 +109,7 @@ HINTS = {
             "4. Retorne o agente"
         ),
         3: (
-            "💡 Dica 3 (Estrutural):\n\n"
+            " Dica 3 (Estrutural):\n\n"
             "```python\n"
             "from pathlib import Path\n"
             "from langchain.tools import tool\n\n"
@@ -133,7 +133,7 @@ HINTS = {
             "```"
         ),
         4: (
-            "💡 Dica 4 (Solução Completa):\n\n"
+            " Dica 4 (Solução Completa):\n\n"
             "```python\n"
             "from langchain.agents import create_agent\n"
             "from langchain.tools import tool\n"
@@ -169,7 +169,7 @@ HINTS = {
         # EASY: ex03_multiple_tools (3 tools), ex04_memory (RunnableWithMessageHistory)
         # MEDIUM: ex03_multiple_tools (3 tools robustas), ex04_memory (SessionStore avançado)
         1: (
-            "💡 Dica 1 (Conceitual):\n\n"
+            " Dica 1 (Conceitual):\n\n"
             "EASY - ex03_multiple_tools:\n"
             "- Crie 3 tools: list_python_files, read_file, count_lines\n"
             "- O agente vai escolher qual tool usar baseado na pergunta\n\n"
@@ -181,10 +181,10 @@ HINTS = {
             "- Crie SessionStore com metadados (created_at, last_accessed)\n"
             "- Implemente trimming de mensagens antigas\n"
             "- Adicione estatísticas de uso\n\n"
-            "📚 Docs: https://python.langchain.com/docs/concepts/chat_history"
+            " Docs: https://python.langchain.com/docs/concepts/chat_history"
         ),
         2: (
-            "💡 Dica 2 (Direcional):\n\n"
+            " Dica 2 (Direcional):\n\n"
             "Para ex03_multiple_tools (EASY):\n"
             "- read_file: use open(file_path, 'r') e retorne conteúdo\n"
             "- count_lines: conte linhas ignorando vazias e comentários\n"
@@ -203,7 +203,7 @@ HINTS = {
             "   )"
         ),
         3: (
-            "💡 Dica 3 (Estrutural):\n\n"
+            " Dica 3 (Estrutural):\n\n"
             "ex03_multiple_tools (read_file):\n"
             "```python\n"
             "@tool\n"
@@ -235,7 +235,7 @@ HINTS = {
             "```"
         ),
         4: (
-            "💡 Dica 4 (Solução):\n\n"
+            " Dica 4 (Solução):\n\n"
             "ex03_multiple_tools - count_lines:\n"
             "```python\n"
             "@tool\n"
@@ -267,7 +267,7 @@ HINTS = {
 
     4: {  # ex05_state_management.py - State Management
         1: (
-            "💡 Dica 1 (Conceitual):\n\n"
+            " Dica 1 (Conceitual):\n\n"
             "State Management é diferente de Memory:\n"
             "- MEMORY: Histórico de conversas (mensagens)\n"
             "- STATE: Dados estruturados que mudam durante um workflow\n\n"
@@ -280,10 +280,10 @@ HINTS = {
             "- Pipeline com múltiplas etapas\n"
             "- Sistema de prioridades\n"
             "- Relatórios agregados\n\n"
-            "📚 Docs: https://docs.python.org/3/library/typing.html#typing.TypedDict"
+            " Docs: https://docs.python.org/3/library/typing.html#typing.TypedDict"
         ),
         2: (
-            "💡 Dica 2 (Direcional):\n\n"
+            " Dica 2 (Direcional):\n\n"
             "EASY - Estrutura do State:\n"
             "```python\n"
             "class AnalysisState(TypedDict):\n"
@@ -304,7 +304,7 @@ HINTS = {
             "- Sistema de prioridades (high_priority, low_priority)"
         ),
         3: (
-            "💡 Dica 3 (Estrutural):\n\n"
+            " Dica 3 (Estrutural):\n\n"
             "EASY - process_next_file:\n"
             "```python\n"
             "def process_next_file(state: AnalysisState) -> AnalysisState:\n"
@@ -340,7 +340,7 @@ HINTS = {
             "```"
         ),
         4: (
-            "💡 Dica 4 (Solução - Loop Principal):\n\n"
+            " Dica 4 (Solução - Loop Principal):\n\n"
             "```python\n"
             "def run_analysis_workflow(directory: str) -> AnalysisState:\n"
             "    # Inicializar\n"
@@ -368,7 +368,7 @@ HINTS = {
 
     5: {  # ex06_structured_output.py - Saída Estruturada com Pydantic
         1: (
-            "💡 Dica 1 (Conceitual):\n\n"
+            " Dica 1 (Conceitual):\n\n"
             "Pydantic permite criar dados estruturados e validados.\n"
             "Use BaseModel para definir a estrutura de dados.\n\n"
             "EASY - Pydantic Básico:\n"
@@ -381,10 +381,10 @@ HINTS = {
             "- Calcule campos derivados (is_private, documentation_score)\n"
             "- ValidationInfo.data para acessar outros campos\n"
             "- Nested models (FunctionInfo dentro de FileAnalysis)\n\n"
-            "📚 Docs: https://docs.pydantic.dev/latest/"
+            " Docs: https://docs.pydantic.dev/latest/"
         ),
         2: (
-            "💡 Dica 2 (Direcional):\n\n"
+            " Dica 2 (Direcional):\n\n"
             "EASY - Estrutura Básica:\n"
             "```python\n"
             "from pydantic import BaseModel, Field\n\n"
@@ -409,7 +409,7 @@ HINTS = {
             "```"
         ),
         3: (
-            "💡 Dica 3 (Estrutural):\n\n"
+            " Dica 3 (Estrutural):\n\n"
             "EASY - Tool com Pydantic:\n"
             "```python\n"
             "@tool\n"
@@ -441,7 +441,7 @@ HINTS = {
             "```"
         ),
         4: (
-            "💡 Dica 4 (Solução - Validator Avançado):\n\n"
+            " Dica 4 (Solução - Validator Avançado):\n\n"
             "MEDIUM - Validator de Documentation Score:\n"
             "```python\n"
             "class FileAnalysis(BaseModel):\n"
@@ -476,16 +476,16 @@ HINTS = {
 
     6: {  # ex07_langgraph_basics.py - Introdução ao LangGraph
         1: (
-            "💡 Dica 1 (Conceitual):\n\n"
+            " Dica 1 (Conceitual):\n\n"
             "LangGraph permite criar workflows com múltiplos steps (nodes).\n"
             "Cada node recebe o state, processa, e retorna campos atualizados.\n"
             "LangGraph faz merge automático do retorno com o state existente!\n\n"
-            "📚 Documentação:\n"
+            " Documentação:\n"
             "https://docs.langchain.com/oss/python/langgraph/overview\n"
             "https://langchain-ai.github.io/langgraph/"
         ),
         2: (
-            "💡 Dica 2 (Direcional):\n\n"
+            " Dica 2 (Direcional):\n\n"
             "Para criar um workflow com LangGraph:\n\n"
             "1. Defina o State com TypedDict\n"
             "2. Crie nodes (funções que recebem state e retornam dict)\n"
@@ -493,10 +493,10 @@ HINTS = {
             "4. workflow.add_node('name', function)\n"
             "5. workflow.add_edge('node1', 'node2')\n"
             "6. graph = workflow.compile()\n\n"
-            "📚 Docs: https://langchain-ai.github.io/langgraph/concepts/low_level/"
+            " Docs: https://langchain-ai.github.io/langgraph/concepts/low_level/"
         ),
         3: (
-            "💡 Dica 3 (Estrutural):\n\n"
+            " Dica 3 (Estrutural):\n\n"
             "```python\n"
             "class GeneratedCode(BaseModel):\n"
             "    code: str\n"
@@ -513,7 +513,7 @@ HINTS = {
             "```"
         ),
         4: (
-            "💡 Dica 4 (Quase Solução):\n\n"
+            " Dica 4 (Quase Solução):\n\n"
             "```python\n"
             "def create_code_generator():\n"
             "    llm = ChatOpenAI(model='gpt-4', temperature=0.7)\n"
@@ -538,14 +538,14 @@ HINTS = {
 
     7: {  # ex08_orchestrator.py - Orquestrador
         1: (
-            "💡 Dica 1 (Conceitual):\n\n"
+            " Dica 1 (Conceitual):\n\n"
             "Um agente orquestrador coordena múltiplos sub-agentes.\n"
             "Cada sub-agente é especializado em uma tarefa.\n"
             "O orquestrador decide qual agente usar e como combinar resultados.\n\n"
             "Pense em como você dividiria um problema complexo entre especialistas."
         ),
         2: (
-            "💡 Dica 2 (Direcional):\n\n"
+            " Dica 2 (Direcional):\n\n"
             "Crie:\n"
             "1. Um agente analisador (análise estática)\n"
             "2. Um agente testador (gera testes)\n"
@@ -555,7 +555,7 @@ HINTS = {
             "O orquestrador pode ter ferramentas que chamam outros agentes!"
         ),
         3: (
-            "💡 Dica 3 (Estrutural):\n\n"
+            " Dica 3 (Estrutural):\n\n"
             "```python\n"
             "# Criar sub-agentes\n"
             "analyzer_agent = create_analyzer_agent()\n"
@@ -570,7 +570,7 @@ HINTS = {
             "```"
         ),
         4: (
-            "💡 Dica 4 (Quase Solução):\n\n"
+            " Dica 4 (Quase Solução):\n\n"
             "```python\n"
             "def create_orchestrator():\n"
             "    # Sub-agentes\n"
@@ -635,7 +635,7 @@ class HintManager:
         footer = f"\n{'='*60}\n\n"
 
         if next_level == 4:
-            warning = "⚠️  ATENÇÃO: Esta é a última dica! Tente resolver por conta própria primeiro.\n\n"
+            warning = "  ATENÇÃO: Esta é a última dica! Tente resolver por conta própria primeiro.\n\n"
             hint_text = warning + hint_text
 
         full_hint = header + hint_text + footer

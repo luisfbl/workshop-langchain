@@ -74,7 +74,7 @@ def create_agent_with_tool():
 
 def test_agent():
     """Testa o agente."""
-    print("🤖 Testando agente com tool...\n")
+    print(" Testando agente com tool...\n")
 
     try:
         agent = create_agent_with_tool()
@@ -96,10 +96,10 @@ def test_agent():
             })
             print(f"Resposta: {response['messages'][-1]}\n")
 
-        print("✅ Todos os testes concluídos!")
+        print(" Todos os testes concluídos!")
 
     except Exception as e:
-        print(f"❌ Erro: {e}")
+        print(f" Erro: {e}")
         import traceback
         traceback.print_exc()
 

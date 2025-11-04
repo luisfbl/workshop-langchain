@@ -23,9 +23,9 @@ WORKFLOW DESTE EXERCÍCIO:
                          ↓
                   [list_files]
                          ↓
-                  [process_file] ←────┐
-                         ↓             │
-                   [should_retry?] ───┘ (se erro e attempts < 3)
+                  [process_file] ←
+                         ↓             
+                   [should_retry?]  (se erro e attempts < 3)
                          ↓
                   [has_more_files?]
                     ↙         ↘
@@ -327,7 +327,7 @@ def run_orchestrator(directory: str) -> str:
     # TODO 5.3: Executar
     final_state = None  # TODO: graph.invoke(initial_state)
 
-    print(f"\n✓ Processados: {len(final_state['files_processed'])} | Docs: {len(final_state['all_docs'])}\n")
+    print(f"\n Processados: {len(final_state['files_processed'])} | Docs: {len(final_state['all_docs'])}\n")
 
     return final_state["final_documentation"]
 
@@ -347,7 +347,7 @@ def test_orchestrator():
         print("\n--- README GERADO ---")
         print(readme[:500] + "..." if len(readme) > 500 else readme)
 
-        print("\n✓ Completo! Agora integre tudo no main.py\n")
+        print("\n Completo! Agora integre tudo no main.py\n")
 
     except Exception as e:
         print(f"\nErro: {e}")

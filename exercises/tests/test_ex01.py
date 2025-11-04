@@ -71,13 +71,13 @@ class TestBasicAgent:
     def test_agent_can_respond(self):
         """Testa se o agente consegue responder perguntas simples"""
         print("\n" + "="*70)
-        print("🧪 TESTE: Primeiro Agente")
+        print(" TESTE: Primeiro Agente")
         print("="*70)
 
         agent = create_basic_agent()
 
         question = "Diga apenas 'OK'"
-        print(f"\n👤 Pergunta: {question}")
+        print(f"\n Pergunta: {question}")
 
         # API 1.0+ usa messages
         result = agent.invoke({
@@ -93,8 +93,8 @@ class TestBasicAgent:
         assert hasattr(last_message, 'content')
         assert len(last_message.content) > 0
 
-        print(f"\n🤖 Resposta: {last_message.content}")
-        print(f"\n📊 Total de mensagens: {len(result['messages'])}")
+        print(f"\n Resposta: {last_message.content}")
+        print(f"\n Total de mensagens: {len(result['messages'])}")
         print("="*70)
 
 

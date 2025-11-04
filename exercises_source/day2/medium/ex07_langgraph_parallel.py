@@ -26,11 +26,11 @@ WORKFLOW:
               ↓
           [list_files]
               ↓
-     ┌────────┴────────┐
+     
      ↓        ↓        ↓
   [proc_1] [proc_2] [proc_3]  <- PARALELO
      ↓        ↓        ↓
-     └────────┬────────┘
+     
               ↓
         [combine_all]
               ↓
@@ -317,7 +317,7 @@ def test_parallel_workflow():
         print(f"\n--- README GERADO em {elapsed:.2f}s ---")
         print(readme[:500] + "..." if len(readme) > 500 else readme)
 
-        print("\n✓ VANTAGENS DO PARALELO:")
+        print("\n VANTAGENS DO PARALELO:")
         print("  - Mais rapido para muitos arquivos")
         print("  - Erros nao travam todo pipeline")
         print("  - Escalavel\n")

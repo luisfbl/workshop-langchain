@@ -59,23 +59,23 @@ class WorkshopSession:
 
         # Configura exercícios do nível do usuário (apenas se necessário)
         if not self.exercise_manager.are_exercises_configured(self.user_level):
-            console.print("[cyan]📁 Configurando exercícios...[/cyan]")
+            console.print("[cyan] Configurando exercícios...[/cyan]")
             if self.exercise_manager.setup_user_exercises(self.user_level):
-                console.print("[green]✅ Exercícios configurados![/green]\n")
+                console.print("[green] Exercícios configurados![/green]\n")
             else:
-                console.print("[yellow]⚠️  Aviso: Erro ao configurar exercícios[/yellow]\n")
+                console.print("[yellow]  Aviso: Erro ao configurar exercícios[/yellow]\n")
 
-        console.print("[yellow]🔑 Verificando API key...[/yellow]")
+        console.print("[yellow] Verificando API key...[/yellow]")
         try:
             api_key = self.api_manager.get_api_key()
-            console.print("[green]✅ API key carregada![/green]\n")
+            console.print("[green] API key carregada![/green]\n")
 
-            level_emoji = "🟢" if self.user_level == "easy" else "🟡"
+            level_emoji = "" if self.user_level == "easy" else ""
             level_name = "FÁCIL" if self.user_level == "easy" else "MÉDIO"
             console.print(f"{level_emoji} [bold]Modo: {level_name}[/bold]")
             console.print(f"[dim]Você está usando exercícios do nível {self.user_level}[/dim]\n")
         except Exception as e:
-            console.print(f"[red]❌ Erro com API key: {e}[/red]")
+            console.print(f"[red] Erro com API key: {e}[/red]")
             return
 
         # Mostra boas-vindas
@@ -147,7 +147,7 @@ class WorkshopSession:
         if cmd in commands:
             commands[cmd](args)
         else:
-            console.print(f"[red]❌ Comando desconhecido: {cmd}[/red]")
+            console.print(f"[red] Comando desconhecido: {cmd}[/red]")
             console.print("[dim]Digite 'help' para ver comandos disponíveis.[/dim]")
 
     def _cmd_help(self, args):
@@ -166,7 +166,7 @@ class WorkshopSession:
   test <num>       - Roda testes de um exercício específico (força execução)
   run, r <num>     - Executa o arquivo do exercício (sem rodar testes)
   reset <num>      - Reseta exercício para estado original
-  restore [num]    - Restaura soluções salvas do Firebase (⚠️ apaga código atual!)
+  restore [num]    - Restaura soluções salvas do Firebase ( apaga código atual!)
   next             - Vai para próximo exercício (se atual completo)
   prev             - Volta para exercício anterior (apenas visualizar)
 
@@ -205,9 +205,9 @@ class WorkshopSession:
                 if 1 <= ex_num <= 8:
                     self.run_tests(ex_num, force=True)
                 else:
-                    console.print("[red]❌ Número de exercício inválido (1-8)[/red]")
+                    console.print("[red] Número de exercício inválido (1-8)[/red]")
             except ValueError:
-                console.print("[red]❌ Use: test <número>[/red]")
+                console.print("[red] Use: test <número>[/red]")
 
     def _cmd_run(self, args):
         """Executa o arquivo do exercício diretamente"""
@@ -220,13 +220,13 @@ class WorkshopSession:
                 if 1 <= ex_num <= 8:
                     self.run_exercise_file(ex_num)
                 else:
-                    console.print("[red]❌ Número de exercício inválido (1-8)[/red]")
+                    console.print("[red] Número de exercício inválido (1-8)[/red]")
             except ValueError:
-                console.print("[red]❌ Use: run <número>[/red]")
+                console.print("[red] Use: run <número>[/red]")
 
     def _cmd_reset(self, args):
         """Reseta exercício"""
-        console.print("[yellow]⚠️  Função de reset ainda não implementada[/yellow]")
+        console.print("[yellow]  Função de reset ainda não implementada[/yellow]")
 
     def _cmd_restore(self, args):
         """Restaura soluções salvas do Firebase"""
@@ -237,24 +237,24 @@ class WorkshopSession:
             try:
                 ex_num = int(args[0])
                 if not (1 <= ex_num <= 8):
-                    console.print("[red]❌ Número de exercício inválido (1-8)[/red]")
+                    console.print("[red] Número de exercício inválido (1-8)[/red]")
                     return
                 exercises_to_restore = [ex_num]
             except ValueError:
-                console.print("[red]❌ Use: restore [número] (sem número restaura todos completos)[/red]")
+                console.print("[red] Use: restore [número] (sem número restaura todos completos)[/red]")
                 return
         else:
             # Restaura todos os exercícios completos
             progress = self.progress.get_progress()
             completed = progress.get("completed_exercises", [])
             if not completed:
-                console.print("[yellow]⚠️  Você ainda não completou nenhum exercício.[/yellow]")
+                console.print("[yellow]  Você ainda não completou nenhum exercício.[/yellow]")
                 console.print("[dim]Não há soluções salvas para restaurar.[/dim]")
                 return
             exercises_to_restore = completed
 
         # Aviso e confirmação
-        console.print("\n[bold red]⚠️  ATENÇÃO: OPERAÇÃO DESTRUTIVA ⚠️[/bold red]\n")
+        console.print("\n[bold red]  ATENÇÃO: OPERAÇÃO DESTRUTIVA [/bold red]\n")
         console.print("[yellow]Esta operação irá:[/yellow]")
         console.print("  • [red]APAGAR[/red] todo o código atual dos exercícios selecionados")
         console.print("  • Substituir pelos códigos salvos no Firebase (suas soluções anteriores)")
@@ -289,7 +289,7 @@ class WorkshopSession:
             return
 
         # Restaura exercícios
-        console.print("\n[yellow]🔄 Restaurando soluções...[/yellow]\n")
+        console.print("\n[yellow] Restaurando soluções...[/yellow]\n")
 
         restored_count = 0
         not_found_count = 0
@@ -306,7 +306,7 @@ class WorkshopSession:
                         ex_name = ex_info["name"]
                     except KeyError:
                         ex_name = f"Exercício {ex_num}"
-                    console.print(f"[yellow]⚠️  Solução não encontrada: {ex_name} (#{ex_num})[/yellow]")
+                    console.print(f"[yellow]  Solução não encontrada: {ex_name} (#{ex_num})[/yellow]")
                     not_found_count += 1
                     continue
 
@@ -314,7 +314,7 @@ class WorkshopSession:
                 try:
                     ex_info = self.progress.get_exercise_info(ex_num)
                 except KeyError:
-                    console.print(f"[red]❌ Exercício {ex_num} não está configurado[/red]")
+                    console.print(f"[red] Exercício {ex_num} não está configurado[/red]")
                     error_count += 1
                     continue
 
@@ -328,14 +328,14 @@ class WorkshopSession:
 
                 if success:
                     ex_name = ex_info["name"]
-                    console.print(f"[green]✅ Restaurado: {ex_name} (#{ex_num})[/green]")
+                    console.print(f"[green] Restaurado: {ex_name} (#{ex_num})[/green]")
                     restored_count += 1
                 else:
-                    console.print(f"[red]❌ Erro ao restaurar exercício {ex_num}[/red]")
+                    console.print(f"[red] Erro ao restaurar exercício {ex_num}[/red]")
                     error_count += 1
 
             except Exception as e:
-                console.print(f"[red]❌ Erro ao processar exercício {ex_num}: {e}[/red]")
+                console.print(f"[red] Erro ao processar exercício {ex_num}: {e}[/red]")
                 error_count += 1
 
         # Resumo
@@ -352,11 +352,11 @@ class WorkshopSession:
         current = self.progress.get_current_exercise()
         if self.progress.is_exercise_completed(current):
             if current < 7:
-                console.print(f"[green]✅ Avançando para exercício {current + 1}[/green]")
+                console.print(f"[green] Avançando para exercício {current + 1}[/green]")
             else:
-                console.print("[yellow]🎉 Você já completou todos os exercícios![/yellow]")
+                console.print("[yellow] Você já completou todos os exercícios![/yellow]")
         else:
-            console.print("[yellow]⚠️  Complete o exercício atual primeiro[/yellow]")
+            console.print("[yellow]  Complete o exercício atual primeiro[/yellow]")
 
     def _cmd_prev(self, args):
         """Volta para exercício anterior"""
@@ -371,7 +371,7 @@ class WorkshopSession:
 
     def _cmd_quit(self, args):
         """Sai do workshop"""
-        console.print("\n[cyan]👋 Até logo! Seu progresso foi salvo.[/cyan]")
+        console.print("\n[cyan] Até logo! Seu progresso foi salvo.[/cyan]")
         self.stop()
 
     def _cmd_statistics(self, args):
@@ -418,14 +418,14 @@ class WorkshopSession:
         try:
             ex_info = self.progress.get_exercise_info(exercise_num)
         except KeyError:
-            console.print(f"[yellow]⚠️  Exercício {exercise_num} não está configurado[/yellow]")
+            console.print(f"[yellow]  Exercício {exercise_num} não está configurado[/yellow]")
             return True
 
         day_dir = self.exercises_dir / f"day{ex_info['day']}"
         exercise_path = day_dir / f"{ex_info['file']}.py"
 
         if not exercise_path.exists():
-            console.print(f"[yellow]⚠️  Arquivo do exercício {exercise_num} não encontrado ({exercise_path})[/yellow]")
+            console.print(f"[yellow]  Arquivo do exercício {exercise_num} não encontrado ({exercise_path})[/yellow]")
             return True
 
         try:
@@ -435,7 +435,7 @@ class WorkshopSession:
                 return False
             return True
         except Exception as e:
-            console.print(f"[yellow]⚠️  Erro ao ler exercício: {e}[/yellow]")
+            console.print(f"[yellow]  Erro ao ler exercício: {e}[/yellow]")
             # Em caso de erro, permite testar
             return True
 
@@ -444,18 +444,18 @@ class WorkshopSession:
         try:
             ex_info = self.progress.get_exercise_info(exercise_num)
         except KeyError:
-            console.print(f"[red]❌ Exercício {exercise_num} não encontrado[/red]")
+            console.print(f"[red] Exercício {exercise_num} não encontrado[/red]")
             return
 
         day_dir = self.exercises_dir / f"day{ex_info['day']}"
         exercise_path = day_dir / f"{ex_info['file']}.py"
 
         if not exercise_path.exists():
-            console.print(f"[red]❌ Arquivo não encontrado: {exercise_path}[/red]")
+            console.print(f"[red] Arquivo não encontrado: {exercise_path}[/red]")
             return
 
         ex_name = EXERCISES[exercise_num]["name"]
-        console.print(f"\n[yellow]🚀 Executando Exercício {exercise_num}: {ex_name}...[/yellow]")
+        console.print(f"\n[yellow] Executando Exercício {exercise_num}: {ex_name}...[/yellow]")
         console.print(f"[dim]Arquivo: {exercise_path}[/dim]\n")
 
         # Prepara ambiente
@@ -484,14 +484,14 @@ class WorkshopSession:
                 console.print(result.stderr)
 
             if result.returncode != 0:
-                console.print(f"\n[red]❌ Programa terminou com código de erro: {result.returncode}[/red]")
+                console.print(f"\n[red] Programa terminou com código de erro: {result.returncode}[/red]")
             else:
-                console.print(f"\n[green]✅ Execução concluída[/green]")
+                console.print(f"\n[green] Execução concluída[/green]")
 
         except subprocess.TimeoutExpired:
-            console.print("[red]❌ Timeout - execução demorou mais de 60 segundos[/red]")
+            console.print("[red] Timeout - execução demorou mais de 60 segundos[/red]")
         except Exception as e:
-            console.print(f"[red]❌ Erro ao executar: {e}[/red]")
+            console.print(f"[red] Erro ao executar: {e}[/red]")
 
         console.print()
 
@@ -511,13 +511,13 @@ class WorkshopSession:
         try:
             # Verifica se pode acessar exercício
             if not self.progress.can_access_exercise(exercise_num):
-                console.print(f"[red]❌ Exercício {exercise_num} bloqueado. Complete os anteriores primeiro.[/red]")
+                console.print(f"[red] Exercício {exercise_num} bloqueado. Complete os anteriores primeiro.[/red]")
                 return
 
             # Verifica se já está completo (só se não forçado)
             if not force and self.progress.is_exercise_completed(exercise_num):
                 ex_name = EXERCISES[exercise_num]["name"]
-                console.print(f"\n[green]✅ Exercício {exercise_num}: {ex_name}[/green]")
+                console.print(f"\n[green] Exercício {exercise_num}: {ex_name}[/green]")
                 console.print("[dim]Este exercício já está completo.[/dim]")
                 console.print(f"[dim]Use 'test {exercise_num}' para forçar a execução dos testes novamente.[/dim]\n")
                 return
@@ -525,7 +525,7 @@ class WorkshopSession:
             # Verifica se o exercício está marcado como "I AM NOT DONE"
             if not self._is_exercise_ready(exercise_num):
                 ex_name = EXERCISES[exercise_num]["name"]
-                console.print(f"\n[yellow]📝 Exercício {exercise_num}: {ex_name}[/yellow]")
+                console.print(f"\n[yellow] Exercício {exercise_num}: {ex_name}[/yellow]")
                 console.print("[dim]O exercício ainda contém 'I AM NOT DONE'.[/dim]")
                 console.print("[dim]Quando terminar de implementar, remova esse comentário para rodar os testes.[/dim]\n")
                 return
@@ -538,7 +538,7 @@ class WorkshopSession:
 
             # Mostra que está rodando
             ex_name = EXERCISES[exercise_num]["name"]
-            console.print(f"\n[yellow]🧪 Testando Exercício {exercise_num}: {ex_name}...[/yellow]")
+            console.print(f"\n[yellow] Testando Exercício {exercise_num}: {ex_name}...[/yellow]")
 
             # Prepara ambiente
             api_key = self.api_manager.get_api_key()
@@ -551,7 +551,7 @@ class WorkshopSession:
             test_file = self.project_root / "exercises" / "tests" / f"test_ex{exercise_num:02d}.py"
 
             if not test_file.exists():
-                console.print(f"[red]❌ Arquivo de teste não encontrado: {test_file}[/red]")
+                console.print(f"[red] Arquivo de teste não encontrado: {test_file}[/red]")
                 return
 
             start_time = time.time()
@@ -571,7 +571,7 @@ class WorkshopSession:
             passed = result.returncode == 0
 
             if passed:
-                console.print(f"[bold green]✅ TODOS OS TESTES PASSARAM! ({elapsed:.1f}s)[/bold green]")
+                console.print(f"[bold green] TODOS OS TESTES PASSARAM! ({elapsed:.1f}s)[/bold green]")
 
                 # Mostrar output dos testes (perguntas e respostas da IA)
                 if result.stdout and len(result.stdout.strip()) > 0:
@@ -590,11 +590,11 @@ class WorkshopSession:
                     if exercise_path.exists():
                         solution_code = exercise_path.read_text(encoding='utf-8')
                         self.firebase.save_exercise_solution(self.user_id, exercise_num, solution_code)
-                        console.print("[dim]💾 Solução salva no Firebase[/dim]")
+                        console.print("[dim] Solução salva no Firebase[/dim]")
                 except Exception as e:
-                    console.print(f"[yellow]⚠️  Aviso: Não foi possível salvar a solução: {e}[/yellow]")
+                    console.print(f"[yellow]  Aviso: Não foi possível salvar a solução: {e}[/yellow]")
             else:
-                console.print(f"[bold red]❌ TESTES FALHARAM ({elapsed:.1f}s)[/bold red]\n")
+                console.print(f"[bold red] TESTES FALHARAM ({elapsed:.1f}s)[/bold red]\n")
                 console.print("[dim]Saída dos testes:[/dim]")
                 console.print(result.stdout)
                 if result.stderr:
@@ -604,9 +604,9 @@ class WorkshopSession:
                 self.progress.save_test_result(exercise_num, False)
 
         except subprocess.TimeoutExpired:
-            console.print("[red]❌ Timeout - teste demorou mais de 60 segundos[/red]")
+            console.print("[red] Timeout - teste demorou mais de 60 segundos[/red]")
         except Exception as e:
-            console.print(f"[red]❌ Erro ao executar testes: {e}[/red]")
+            console.print(f"[red] Erro ao executar testes: {e}[/red]")
         finally:
             self.current_test_running = False
 
@@ -654,17 +654,17 @@ class ExerciseWatcher(FileSystemEventHandler):
             compilation_result = self.workshop._compile_check(file_path)
 
             if compilation_result["success"]:
-                console.print(f"[green]✅ Compilação bem-sucedida[/green]")
+                console.print(f"[green] Compilação bem-sucedida[/green]")
 
                 if self.workshop._is_exercise_ready(ex_num):
-                    console.print(f"[bold yellow]🚀 Exercício {ex_num} pronto para testar![/bold yellow]")
+                    console.print(f"[bold yellow] Exercício {ex_num} pronto para testar![/bold yellow]")
                     console.print(f"[dim]   Executando testes...[/dim]\n")
                     self.workshop.run_tests(ex_num)
                 else:
-                    console.print(f"[dim]💡 Para testar: remova 'I AM NOT DONE' ou digite: test {ex_num}[/dim]")
+                    console.print(f"[dim] Para testar: remova 'I AM NOT DONE' ou digite: test {ex_num}[/dim]")
                     console.print()
             else:
-                console.print(f"[red]❌ Compilação falhou[/red]\n")
+                console.print(f"[red] Compilação falhou[/red]\n")
                 for error in compilation_result["errors"]:
                     console.print(error)
                 console.print(f"\n[red]error: could not compile `{file_path.name}`[/red]")
@@ -678,14 +678,14 @@ def main():
     try:
         firebase = FirebaseClient()
     except Exception as e:
-        console.print(f"[red]❌ Erro ao conectar com Firebase: {e}[/red]")
+        console.print(f"[red] Erro ao conectar com Firebase: {e}[/red]")
         return 1
 
     auth = Authenticator(firebase)
     session = auth.require_auth()
 
     if not session:
-        console.print("[red]❌ Você precisa fazer login primeiro. Execute: python main.py[/red]")
+        console.print("[red] Você precisa fazer login primeiro. Execute: python main.py[/red]")
         return 1
 
     workshop = WorkshopSession(session, firebase)

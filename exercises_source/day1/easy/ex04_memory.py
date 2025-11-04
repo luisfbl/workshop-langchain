@@ -127,11 +127,11 @@ def show_session_history(session_id: str):
     history = store[session_id]
     messages = history.messages
 
-    print(f"\n  📜 Histórico da sessão '{session_id}' ({len(messages)} mensagens):")
+    print(f"\n   Histórico da sessão '{session_id}' ({len(messages)} mensagens):")
     print("  " + "-" * 60)
 
     for msg in messages:
-        role = "👤 Usuário" if msg.type == "human" else "🤖 Assistente"
+        role = " Usuário" if msg.type == "human" else " Assistente"
         content = msg.content[:100] + "..." if len(msg.content) > 100 else msg.content
         print(f"  {role}: {content}")
 
@@ -143,29 +143,29 @@ def show_session_history(session_id: str):
 
 def test_single_session():
     print("\n" + "=" * 70)
-    print("🧪 TESTE 1: CONVERSA EM UMA ÚNICA SESSÃO")
+    print(" TESTE 1: CONVERSA EM UMA ÚNICA SESSÃO")
     print("=" * 70)
 
     chat_with_history = create_chat_with_history()
     session_id = "user_123"
 
-    print(f"\n👤 Sessão: {session_id}")
+    print(f"\n Sessão: {session_id}")
     print("-" * 70)
 
     # Primeira mensagem
-    print("\n👤 Usuário: Meu nome é João e eu gosto de Python")
+    print("\n Usuário: Meu nome é João e eu gosto de Python")
     response1 = chat(chat_with_history, session_id, "Meu nome é João e eu gosto de Python")
-    print(f"🤖 Assistente: {response1}\n")
+    print(f" Assistente: {response1}\n")
 
     # Segunda mensagem - deve lembrar do nome
-    print("👤 Usuário: Qual é meu nome?")
+    print(" Usuário: Qual é meu nome?")
     response2 = chat(chat_with_history, session_id, "Qual é meu nome?")
-    print(f"🤖 Assistente: {response2}\n")
+    print(f" Assistente: {response2}\n")
 
     # Terceira mensagem - deve lembrar da linguagem
-    print("👤 Usuário: Qual linguagem eu gosto?")
+    print(" Usuário: Qual linguagem eu gosto?")
     response3 = chat(chat_with_history, session_id, "Qual linguagem eu gosto?")
-    print(f"🤖 Assistente: {response3}\n")
+    print(f" Assistente: {response3}\n")
 
     # Mostrar histórico
     show_session_history(session_id)
@@ -175,37 +175,37 @@ def test_single_session():
 def test_multiple_sessions():
     """Testa múltiplas sessões independentes."""
     print("\n\n" + "=" * 70)
-    print("🧪 TESTE 2: MÚLTIPLAS SESSÕES INDEPENDENTES")
+    print(" TESTE 2: MÚLTIPLAS SESSÕES INDEPENDENTES")
     print("=" * 70)
 
     chat_with_history = create_chat_with_history()
 
     # Sessão 1
-    print("\n👤 Sessão: user_alice")
+    print("\n Sessão: user_alice")
     print("-" * 70)
-    print("👤 Alice: Meu nome é Alice e eu moro em São Paulo")
+    print(" Alice: Meu nome é Alice e eu moro em São Paulo")
     r1 = chat(chat_with_history, "user_alice", "Meu nome é Alice e eu moro em São Paulo")
-    print(f"🤖 Assistente: {r1}\n")
+    print(f" Assistente: {r1}\n")
 
     # Sessão 2
-    print("\n👤 Sessão: user_bob")
+    print("\n Sessão: user_bob")
     print("-" * 70)
-    print("👤 Bob: Meu nome é Bob e eu moro no Rio")
+    print(" Bob: Meu nome é Bob e eu moro no Rio")
     r2 = chat(chat_with_history, "user_bob", "Meu nome é Bob e eu moro no Rio")
-    print(f"🤖 Assistente: {r2}\n")
+    print(f" Assistente: {r2}\n")
 
     # Voltar para sessão 1 - deve lembrar de Alice
-    print("\n👤 Sessão: user_alice (voltando)")
+    print("\n Sessão: user_alice (voltando)")
     print("-" * 70)
-    print("👤 Alice: Onde eu moro?")
+    print(" Alice: Onde eu moro?")
     r3 = chat(chat_with_history, "user_alice", "Onde eu moro?")
-    print(f"🤖 Assistente: {r3}\n")
+    print(f" Assistente: {r3}\n")
 
-    print("\n👤 Sessão: user_bob (voltando)")
+    print("\n Sessão: user_bob (voltando)")
     print("-" * 70)
-    print("👤 Bob: Qual é meu nome?")
+    print(" Bob: Qual é meu nome?")
     r4 = chat(chat_with_history, "user_bob", "Qual é meu nome?")
-    print(f"🤖 Assistente: {r4}\n")
+    print(f" Assistente: {r4}\n")
 
     show_session_history("user_alice")
     show_session_history("user_bob")
@@ -217,7 +217,7 @@ def test_memory():
         test_single_session()
         test_multiple_sessions()
     except Exception as e:
-        print(f"\n❌ Erro: {e}")
+        print(f"\n Erro: {e}")
         import traceback
         traceback.print_exc()
 

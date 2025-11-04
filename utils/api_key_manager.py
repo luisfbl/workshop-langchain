@@ -57,7 +57,7 @@ class APIKeyManager:
             return False
 
         except Exception as e:
-            print(f"❌ Erro ao testar API key: {e}")
+            print(f" Erro ao testar API key: {e}")
             return False
 
     def get_provider(self) -> str:
@@ -92,22 +92,22 @@ class RateLimiter:
         if not can_use:
             if reason == "total_limit":
                 message = (
-                    f"❌ Limite TOTAL de API atingido ({total_limit} chamadas).\n"
+                    f" Limite TOTAL de API atingido ({total_limit} chamadas).\n"
                     f"   Você atingiu o máximo de chamadas permitidas durante TODO o workshop.\n"
                     f"   Fale com o instrutor se você precisa de mais chamadas."
                 )
             else:  # daily_limit
                 message = (
-                    f"❌ Limite diário de API atingido ({daily_limit} chamadas).\n"
+                    f" Limite diário de API atingido ({daily_limit} chamadas).\n"
                     f"   O limite será resetado à meia-noite UTC.\n"
                     f"   Se você precisa de mais chamadas, fale com o instrutor."
                 )
             return False, 0, message
 
         if remaining <= 10:
-            message = f"⚠️  Atenção: apenas {remaining} chamadas restantes."
+            message = f"  Atenção: apenas {remaining} chamadas restantes."
         else:
-            message = f"✅ Você tem {remaining} chamadas de API disponíveis."
+            message = f" Você tem {remaining} chamadas de API disponíveis."
 
         return True, remaining, message
 

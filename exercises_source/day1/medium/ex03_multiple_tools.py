@@ -181,7 +181,7 @@ def test_agent():
             print(f"\nResposta: {response['messages'][-1]}\n")
 
     except Exception as e:
-        print(f"❌ Erro: {e}")
+        print(f" Erro: {e}")
         import traceback
         traceback.print_exc()
 

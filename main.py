@@ -19,20 +19,20 @@ console = Console()
 
 def show_banner():
     banner = """
-[bold cyan]╔═══════════════════════════════════════════════════════════╗
-║                                                           ║
-║        🤖  LANGCHAIN AGENTS WORKSHOP  🤖                  ║
-║                                                           ║
-║           Aprenda a Criar Agentes Inteligentes           ║
-║              com LangChain e Python                       ║
-║                                                           ║
-╚═══════════════════════════════════════════════════════════╝[/bold cyan]
+[bold cyan]
+                                                           
+          LANGCHAIN AGENTS WORKSHOP                    
+                                                           
+           Aprenda a Criar Agentes Inteligentes           
+              com LangChain e Python                       
+                                                           
+[/bold cyan]
     """
     console.print(banner)
 
 
 def run_initial_quiz() -> str:
-    console.print("\n[bold yellow]📋 AVALIAÇÃO INICIAL[/bold yellow]\n")
+    console.print("\n[bold yellow] AVALIAÇÃO INICIAL[/bold yellow]\n")
     console.print("Responda 5 perguntas para determinarmos o melhor nível para você.\n")
 
     score = 0
@@ -119,7 +119,7 @@ def run_initial_quiz() -> str:
 
 
 def register_flow(auth: Authenticator, firebase: FirebaseClient):
-    console.print("\n[bold cyan]📝 REGISTRO DE NOVO USUÁRIO[/bold cyan]\n")
+    console.print("\n[bold cyan] REGISTRO DE NOVO USUÁRIO[/bold cyan]\n")
 
     while True:
         username = Prompt.ask(
@@ -127,16 +127,16 @@ def register_flow(auth: Authenticator, firebase: FirebaseClient):
         )
 
         if len(username) < 3:
-            console.print("[red]❌ Nome muito curto. Mínimo 3 caracteres.[/red]")
+            console.print("[red] Nome muito curto. Mínimo 3 caracteres.[/red]")
             continue
 
         if not username.isalnum():
-            console.print("[red]❌ Use apenas letras e números.[/red]")
+            console.print("[red] Use apenas letras e números.[/red]")
             continue
 
         existing = firebase.get_user_by_username(username)
         if existing:
-            console.print("[red]❌ Nome de usuário já existe. Escolha outro.[/red]")
+            console.print("[red] Nome de usuário já existe. Escolha outro.[/red]")
             continue
 
         break
@@ -145,13 +145,13 @@ def register_flow(auth: Authenticator, firebase: FirebaseClient):
         password = Prompt.ask("Senha (mínimo 6 caracteres)", password=True)
 
         if len(password) < 6:
-            console.print("[red]❌ Senha muito curta. Mínimo 6 caracteres.[/red]")
+            console.print("[red] Senha muito curta. Mínimo 6 caracteres.[/red]")
             continue
 
         password_confirm = Prompt.ask("Confirme a senha", password=True)
 
         if password != password_confirm:
-            console.print("[red]❌ Senhas não coincidem. Tente novamente.[/red]")
+            console.print("[red] Senhas não coincidem. Tente novamente.[/red]")
             continue
 
         break
@@ -160,31 +160,31 @@ def register_flow(auth: Authenticator, firebase: FirebaseClient):
 
     if success:
         user_id = result
-        console.print("\n[green]✅ Usuário criado com sucesso![/green]\n")
+        console.print("\n[green] Usuário criado com sucesso![/green]\n")
 
         level = run_initial_quiz()
         firebase.update_user_level(user_id, level)
 
-        console.print(f"\n[green]✅ Nível definido: {level.upper()}[/green]")
+        console.print(f"\n[green] Nível definido: {level.upper()}[/green]")
 
         # Configura exercícios do nível escolhido
-        console.print("\n[cyan]📁 Configurando exercícios do seu nível...[/cyan]")
+        console.print("\n[cyan] Configurando exercícios do seu nível...[/cyan]")
         exercise_manager = ExerciseManager(Path(__file__).parent)
         if exercise_manager.setup_user_exercises(level):
-            console.print("[green]✅ Exercícios configurados![/green]")
+            console.print("[green] Exercícios configurados![/green]")
         else:
-            console.print("[yellow]⚠️  Aviso: Erro ao configurar exercícios[/yellow]")
+            console.print("[yellow]  Aviso: Erro ao configurar exercícios[/yellow]")
 
         console.print("\n[dim]Faça login para começar o workshop.[/dim]\n")
 
         return True
     else:
-        console.print(f"\n[red]❌ Erro no registro: {result}[/red]\n")
+        console.print(f"\n[red] Erro no registro: {result}[/red]\n")
         return False
 
 
 def login_flow(auth: Authenticator) -> dict[str, Any] | None:
-    console.print("\n[bold cyan]🔐 LOGIN[/bold cyan]\n")
+    console.print("\n[bold cyan] LOGIN[/bold cyan]\n")
 
     username = Prompt.ask("Nome de usuário")
     password = Prompt.ask("Senha", password=True)
@@ -192,10 +192,10 @@ def login_flow(auth: Authenticator) -> dict[str, Any] | None:
     success, message, session = auth.login(username, password)
 
     if success:
-        console.print(f"\n[green]✅ {message}[/green]\n")
+        console.print(f"\n[green] {message}[/green]\n")
         return session
     else:
-        console.print(f"\n[red]❌ {message}[/red]\n")
+        console.print(f"\n[red] {message}[/red]\n")
         return None
 
 
@@ -208,10 +208,10 @@ def main():
         try:
             firebase = FirebaseClient()
         except Exception as e:
-            console.print(f"[red]❌ Erro ao conectar com Firebase: {e}[/red]")
+            console.print(f"[red] Erro ao conectar com Firebase: {e}[/red]")
             return 1
         else:
-            console.print(f"[red]❌ Comando desconhecido: {command}[/red]")
+            console.print(f"[red] Comando desconhecido: {command}[/red]")
             console.print("\nComandos disponíveis:")
             console.print("  --init-api-key      : Configura API key (instrutor)")
             return 1
@@ -219,7 +219,7 @@ def main():
     try:
         firebase = FirebaseClient()
     except Exception as e:
-        console.print(f"[red]❌ Erro ao conectar com Firebase: {e}[/red]")
+        console.print(f"[red] Erro ao conectar com Firebase: {e}[/red]")
         console.print(
             "\nVerifique se o arquivo config/firebase_config.json existe e está correto."
         )
@@ -269,7 +269,7 @@ def main():
                 continue
 
         elif choice == "3":
-            console.print("\n[cyan]👋 Até logo![/cyan]")
+            console.print("\n[cyan] Até logo![/cyan]")
             break
 
     return 0
@@ -279,10 +279,10 @@ if __name__ == "__main__":
     try:
         sys.exit(main())
     except KeyboardInterrupt:
-        console.print("\n\n[yellow]👋 Interrompido pelo usuário[/yellow]")
+        console.print("\n\n[yellow] Interrompido pelo usuário[/yellow]")
         sys.exit(0)
     except Exception as e:
-        console.print(f"\n[bold red]❌ Erro fatal: {e}[/bold red]")
+        console.print(f"\n[bold red] Erro fatal: {e}[/bold red]")
         import traceback
 
         traceback.print_exc()

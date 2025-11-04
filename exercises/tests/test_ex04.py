@@ -69,7 +69,7 @@ class TestChatWithHistory:
     def test_single_session_memory(self):
         """Testa se o chat mantém memória em uma sessão"""
         print("\n" + "="*70)
-        print("🧪 TESTE: Memory em uma sessão")
+        print(" TESTE: Memory em uma sessão")
         print("="*70)
 
         # Limpa o store
@@ -79,14 +79,14 @@ class TestChatWithHistory:
         session_id = "test_session_1"
 
         # Primeira mensagem
-        print("\n👤 Mensagem 1: Meu nome é João")
+        print("\n Mensagem 1: Meu nome é João")
         response1 = ex04.chat(chat_with_history, session_id, "Meu nome é João")
-        print(f"🤖 Resposta: {response1}")
+        print(f" Resposta: {response1}")
 
         # Segunda mensagem - deve lembrar do nome
-        print("\n👤 Mensagem 2: Qual é meu nome?")
+        print("\n Mensagem 2: Qual é meu nome?")
         response2 = ex04.chat(chat_with_history, session_id, "Qual é meu nome?")
-        print(f"🤖 Resposta: {response2}")
+        print(f" Resposta: {response2}")
         print("="*70)
 
         # Verifica se o nome aparece na resposta
@@ -97,7 +97,7 @@ class TestChatWithHistory:
     def test_multiple_sessions_isolation(self):
         """Testa se sessões diferentes são isoladas"""
         print("\n" + "="*70)
-        print("🧪 TESTE: Isolamento entre sessões")
+        print(" TESTE: Isolamento entre sessões")
         print("="*70)
 
         # Limpa o store
@@ -106,19 +106,19 @@ class TestChatWithHistory:
         chat_with_history = ex04.create_chat_with_history()
 
         # Sessão 1
-        print("\n👤 Sessão 1: Meu nome é Alice")
+        print("\n Sessão 1: Meu nome é Alice")
         r1 = ex04.chat(chat_with_history, "session_alice", "Meu nome é Alice")
-        print(f"🤖 Resposta: {r1}")
+        print(f" Resposta: {r1}")
 
         # Sessão 2
-        print("\n👤 Sessão 2: Meu nome é Bob")
+        print("\n Sessão 2: Meu nome é Bob")
         r2 = ex04.chat(chat_with_history, "session_bob", "Meu nome é Bob")
-        print(f"🤖 Resposta: {r2}")
+        print(f" Resposta: {r2}")
 
         # Voltar para sessão 1
-        print("\n👤 Sessão 1: Qual é meu nome?")
+        print("\n Sessão 1: Qual é meu nome?")
         r3 = ex04.chat(chat_with_history, "session_alice", "Qual é meu nome?")
-        print(f"🤖 Resposta: {r3}")
+        print(f" Resposta: {r3}")
         print("="*70)
 
         # Deve lembrar de Alice, não de Bob
