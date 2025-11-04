@@ -58,7 +58,7 @@ def create_basic_agent():
 # ============================================================================
 
 def test_agent():
-    print("🤖 Testando agente básico...\n")
+    print(" Testando agente básico...\n")
 
     try:
         agent = create_basic_agent()
@@ -87,7 +87,7 @@ def test_agent():
         print(f"Resposta: {last_message.content}\n")
 
     except Exception as e:
-        print(f"❌ Erro: {e}")
+        print(f" Erro: {e}")
         import traceback
         traceback.print_exc()
 

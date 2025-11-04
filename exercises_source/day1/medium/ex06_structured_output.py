@@ -267,7 +267,7 @@ def test_structured_output():
             # Validar com Pydantic
             validated = FileAnalysis(**data)
 
-            print(f"\n📊 Análise:")
+            print(f"\n Análise:")
             print(f"  Arquivo: {validated.file_name}")
             print(f"  Linhas: {validated.total_lines}")
             print(f"  Código: {validated.code_lines}")
@@ -278,12 +278,12 @@ def test_structured_output():
 
             print(f"\nDetalhes das funções:")
             for func in validated.functions:
-                privacy = "🔒" if func.is_private else "🔓"
-                docs = "✓" if func.has_docstring else "✗"
+                privacy = "[P]" if func.is_private else "   "
+                docs = "[+]" if func.has_docstring else "[-]"
                 print(f"  {privacy} {docs} {func.name} (linha {func.line_number})")
 
         except Exception as e:
-            print(f"❌ Erro na validação: {e}")
+            print(f" Erro na validação: {e}")
 
         print("\n" + "=" * 70)
         print("TESTE 2: Perguntas sobre dados estruturados")
@@ -303,7 +303,7 @@ def test_structured_output():
             print(f"Resposta: {r['messages'][-1]}")
 
     except Exception as e:
-        print(f"❌ Erro: {e}")
+        print(f" Erro: {e}")
         import traceback
         traceback.print_exc()
 

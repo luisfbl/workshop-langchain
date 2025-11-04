@@ -16,7 +16,7 @@ O QUE VOCE VAI IMPLEMENTAR:
 
 DESAFIO REAL:
 Sistemas de producao precisam lidar com:
-1. Interrup��oes (crash, timeout, Ctrl+C)
+1. Interrupoes (crash, timeout, Ctrl+C)
 2. Falhas temporarias (API rate limit, network)
 3. Dados ruins (arquivo corrompido, syntax error)
 4. Recursos limitados (memoria, tempo)
@@ -28,17 +28,17 @@ ARQUITETURA:
                       ↓
                 [checkpoint_load]
                       ↓
-               ┌──[list_files]──┐
+               [list_files]
                ↓                 ↓
          [validate_file]    [skip_processed]
                ↓                 ↓
          [analyze_with_retry]   ↓
                ↓                 ↓
-         [quality_gate]──────────┤
+         [quality_gate]
                ↓ (pass)          ↓
          [generate_docs]    [mark_failed]
                ↓                 ↓
-         [checkpoint_save]──────┘
+         [checkpoint_save]
                ↓
          [more_files?]
           ↙         ↘
@@ -494,7 +494,7 @@ def test_advanced_orchestrator():
         # graph = create_advanced_orchestrator()
         # ...
 
-        print("\n✓ Features avancadas implementadas!")
+        print("\n Features avancadas implementadas!")
         print("  - Checkpointing: Retoma de onde parou")
         print("  - Retry: Tenta novamente com backoff")
         print("  - Quality gates: Valida antes de prosseguir")

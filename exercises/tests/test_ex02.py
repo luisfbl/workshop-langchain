@@ -60,13 +60,13 @@ class TestAgentWithTool:
     def test_agent_can_use_tool(self):
         """Testa se o agente consegue usar a tool"""
         print("\n" + "="*70)
-        print("🧪 TESTE: Agente usando Tool")
+        print(" TESTE: Agente usando Tool")
         print("="*70)
 
         agent = create_agent_with_tool()
 
         question = "Liste os arquivos Python no diretório ./sample_project"
-        print(f"\n👤 Pergunta: {question}")
+        print(f"\n Pergunta: {question}")
 
         result = agent.invoke({
             "messages": [{"role": "user", "content": question}]
@@ -75,8 +75,8 @@ class TestAgentWithTool:
         assert "messages" in result
         last_message = result["messages"][-1]
 
-        print(f"\n🤖 Resposta: {last_message.content}")
-        print(f"\n📊 Total de mensagens: {len(result['messages'])}")
+        print(f"\n Resposta: {last_message.content}")
+        print(f"\n Total de mensagens: {len(result['messages'])}")
         print("="*70)
 
         # Deve mencionar alguns arquivos

@@ -190,22 +190,22 @@ def test_structured_output():
                 json_str = output[start:end]
                 data = json.loads(json_str)
 
-                print(f"\n📊 Dados extraídos:")
+                print(f"\n Dados extraídos:")
                 print(f"  - Arquivo: {data.get('file_name')}")
                 print(f"  - Linhas: {data.get('total_lines')}")
                 print(f"  - Funções: {len(data.get('functions', []))}")
                 print(f"  - Precisa docs: {data.get('needs_documentation')}")
 
-                print(f"\n📝 Funções encontradas:")
+                print(f"\n Funções encontradas:")
                 for func in data.get('functions', []):
-                    status = "✓" if func.get('has_docstring') else "✗"
+                    status = "[+]" if func.get('has_docstring') else "[-]"
                     print(f"  {status} {func.get('name')}({', '.join(func.get('args', []))})")
 
             else:
-                print("⚠️  JSON não encontrado na resposta")
+                print("  JSON não encontrado na resposta")
 
         except json.JSONDecodeError as e:
-            print(f"❌ JSON INVÁLIDO: {e}")
+            print(f" JSON INVÁLIDO: {e}")
 
         print("\n" + "=" * 70)
         print("TESTE 2: Pergunta sobre dados estruturados (com histórico)")
@@ -222,7 +222,7 @@ def test_structured_output():
         print(f"\nResposta: {messages[-1].content}")
 
     except Exception as e:
-        print(f"❌ Erro: {e}")
+        print(f" Erro: {e}")
         import traceback
         traceback.print_exc()
 

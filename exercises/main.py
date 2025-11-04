@@ -34,7 +34,7 @@ try:
     )
 except ImportError:
     # Fallback para quando exercícios não estão configurados
-    print("⚠️  Exercícios ainda não configurados. Execute 'python main.py' primeiro.")
+    print("  Exercícios ainda não configurados. Execute 'python main.py' primeiro.")
     create_orchestrator_graph = None
     OrchestratorState = None
 
@@ -119,7 +119,7 @@ def generate_documentation(
             f.write(final_state["final_documentation"])
 
         # Resumo
-        print(f"\n✓ Documentação gerada!")
+        print(f"\n Documentação gerada!")
         print(f"  Arquivos: {len(final_state['files_processed'])} | Docs: {len(final_state['all_docs'])}")
         print(f"  Salvo em: {output_path}")
 

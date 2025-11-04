@@ -299,7 +299,7 @@ def test_langgraph():
         print("\n--- DOCUMENTACAO GERADA ---")
         print(documentation)
 
-        print("\n✓ Workflow completo! Proximo: conditional routing (ex07)\n")
+        print("\n Workflow completo! Proximo: conditional routing (ex07)\n")
 
     except Exception as e:
         print(f"\nErro: {e}")

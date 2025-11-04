@@ -115,7 +115,7 @@ def show_session_stats(session_id: str):
         return
 
     # TODO: Implementar exibição de estatísticas
-    print(f"\n  📊 Estatísticas da sessão '{session_id}':")
+    print(f"\n   Estatísticas da sessão '{session_id}':")
     print("  " + "-" * 60)
     print(f"  Total de mensagens: ???")  # TODO: mostrar contagem real
 
@@ -124,7 +124,7 @@ def show_all_sessions():
     # TODO: Listar todas as chaves do store
     sessions = list(store.keys())
 
-    print(f"\n  📋 Sessões ativas: {len(sessions)}")
+    print(f"\n   Sessões ativas: {len(sessions)}")
     print("  " + "=" * 60)
 
     for session_id in sessions:
@@ -143,13 +143,13 @@ def show_all_sessions():
 def test_basic_chat():
     """Testa chat básico com metadados."""
     print("\n" + "=" * 70)
-    print("🧪 TESTE 1: CHAT COM METADADOS")
+    print(" TESTE 1: CHAT COM METADADOS")
     print("=" * 70)
 
     chat_with_history = create_chat_with_history()
 
     # Conversa 1
-    print("\n👤 Sessão: user_123")
+    print("\n Sessão: user_123")
     print("-" * 70)
     chat(chat_with_history, "user_123", "Meu nome é João")
     chat(chat_with_history, "user_123", "Qual é meu nome?")
@@ -157,7 +157,7 @@ def test_basic_chat():
     show_session_stats("user_123")
 
     # Conversa 2
-    print("\n\n👤 Sessão: user_456")
+    print("\n\n Sessão: user_456")
     print("-" * 70)
     chat(chat_with_history, "user_456", "Meu nome é Maria")
     chat(chat_with_history, "user_456", "Eu gosto de Python")
@@ -172,14 +172,14 @@ def test_basic_chat():
 def test_trimming():
     """Testa limitação de histórico."""
     print("\n\n" + "=" * 70)
-    print("🧪 TESTE 2: TRIMMING DE MENSAGENS")
+    print(" TESTE 2: TRIMMING DE MENSAGENS")
     print("=" * 70)
 
     # Chat com limite de 4 mensagens
     chat_limited = create_chat_with_history(max_messages=4)
     session_id = "test_trim"
 
-    print(f"\n👤 Sessão: {session_id} (máx: 4 mensagens)")
+    print(f"\n Sessão: {session_id} (máx: 4 mensagens)")
     print("-" * 70)
 
     messages = [
@@ -191,18 +191,18 @@ def test_trimming():
     ]
 
     for msg in messages:
-        print(f"\n👤 Enviando: {msg}")
+        print(f"\n Enviando: {msg}")
         chat(chat_limited, session_id, msg)
 
     show_session_stats(session_id)
-    print("\n  ⚠️  Com trimming, apenas as últimas mensagens são mantidas")
+    print("\n    Com trimming, apenas as últimas mensagens são mantidas")
     print("=" * 70)
 
 
 def test_session_management():
     """Testa gerenciamento de sessões."""
     print("\n\n" + "=" * 70)
-    print("🧪 TESTE 3: GERENCIAMENTO DE SESSÕES")
+    print(" TESTE 3: GERENCIAMENTO DE SESSÕES")
     print("=" * 70)
 
     chat_with_history = create_chat_with_history()
@@ -216,7 +216,7 @@ def test_session_management():
     show_all_sessions()
 
     # Deletar uma sessão
-    print("\n  🗑️  Deletando session_1...")
+    print("\n    Deletando session_1...")
     # TODO: Deletar session_1 do store usando del
     if "session_1" in store:
         del store["session_1"]
@@ -233,15 +233,15 @@ def test_memory():
         test_trimming()
         test_session_management()
 
-        print("\n\n📝 RESUMO:")
+        print("\n\n RESUMO:")
         print("=" * 70)
-        print("✅ SessionStore adiciona metadados às sessões")
-        print("✅ Trimming limita o tamanho do histórico")
-        print("✅ Gerenciamento completo de múltiplas sessões")
+        print(" SessionStore adiciona metadados às sessões")
+        print(" Trimming limita o tamanho do histórico")
+        print(" Gerenciamento completo de múltiplas sessões")
         print("=" * 70)
 
     except Exception as e:
-        print(f"\n❌ Erro: {e}")
+        print(f"\n Erro: {e}")
         import traceback
         traceback.print_exc()
 
