@@ -463,9 +463,11 @@ class WorkshopSession:
         env = setup_environment_for_test(api_key)
         env['WORKSHOP_LEVEL'] = self.user_level
 
+        module_name = f"exercises.day{ex_info['day']}.{ex_info['file']}"
+
         try:
             result = subprocess.run(
-                [sys.executable, str(exercise_path)],
+                [sys.executable, "-m", module_name],
                 capture_output=True,
                 text=True,
                 env=env,

@@ -94,7 +94,7 @@ def test_agent():
             response = agent.invoke({
                 "messages": [{"role": "user", "content": query}]
             })
-            print(f"Resposta: {response['output']}\n")
+            print(f"Resposta: {response['messages'][-1]}\n")
 
         print("✅ Todos os testes concluídos!")
 

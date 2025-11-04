@@ -250,7 +250,7 @@ def test_structured_output():
             "messages": [{"role": "user", "content": "Analise completamente o arquivo ./sample_project/calculator.py"}]
         })
 
-        print(f"\nResposta:\n{response['output']}\n")
+        print(f"\nResposta:\n{response['messages'][-1]}\n")
 
         # Validar JSON
         print("=" * 70)
@@ -258,7 +258,7 @@ def test_structured_output():
         print("=" * 70)
 
         try:
-            output = response['output']
+            output = response['messages'][-1]
             start = output.find('{')
             end = output.rfind('}') + 1
             json_str = output[start:end]
@@ -300,7 +300,7 @@ def test_structured_output():
             r = agent.invoke({
                 "messages": [{"role": "user", "content": q}]
             })
-            print(f"Resposta: {r['output']}")
+            print(f"Resposta: {r['messages'][-1]}")
 
     except Exception as e:
         print(f"❌ Erro: {e}")

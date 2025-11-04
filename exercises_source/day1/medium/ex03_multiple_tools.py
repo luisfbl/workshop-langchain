@@ -178,7 +178,7 @@ def test_agent():
             response = agent.invoke({
                 "messages": [{"role": "user", "content": query}]
             })
-            print(f"\nResposta: {response['output']}\n")
+            print(f"\nResposta: {response['messages'][-1]}\n")
 
     except Exception as e:
         print(f"❌ Erro: {e}")
