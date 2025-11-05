@@ -327,6 +327,11 @@ class ProgressTracker:
         progress = self.get_progress()
         hints_used = progress.get("hints_used", {})
 
+        # Firebase pode retornar lista ao invés de dict quando chaves são números consecutivos
+        if isinstance(hints_used, list):
+            # Converte lista para dict: [item0, item1, ...] -> {"0": item0, "1": item1, ...}
+            hints_used = {str(i): item for i, item in enumerate(hints_used) if item is not None}
+
         if not hints_used:
             console.print("[dim]Você ainda não usou nenhuma dica.[/dim]\n")
             return
@@ -363,6 +368,9 @@ class ProgressTracker:
         console.print(f"[bold]Total de Tentativas:[/bold] {total_attempts}")
 
         hints = progress.get("hints_used", {})
+        # Firebase pode retornar lista ao invés de dict quando chaves são números consecutivos
+        if isinstance(hints, list):
+            hints = {str(i): item for i, item in enumerate(hints) if item is not None}
         total_hints = sum(len(h) for h in hints.values())
         console.print(f"[bold]Dicas Usadas:[/bold] {total_hints}")
 

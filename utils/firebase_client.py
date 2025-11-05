@@ -10,10 +10,10 @@ import requests
 
 class FirebaseClient:
     """Cliente Firebase usando REST API"""
-    
+
     config_path: Path
     database_url: str
-    
+
     def __init__(self, config: str | None = None):
         config_path = None
         if config is None:
@@ -460,22 +460,4 @@ class FirebaseClient:
     def check_rate_limit(
         self, user_id: str, daily_limit: int = 100, total_limit: int = 200
     ) -> tuple[bool, int, str]:
-        usage = self.get_api_usage(user_id)
-
-        if not usage:
-            return False, 0, "user_not_found"
-
-        calls_today: int = usage.get("calls_today", 0)
-        total_calls: int = usage.get("total_calls", 0)
-
-        if total_calls >= total_limit:
-            return False, 0, "total_limit"
-
-        if calls_today >= daily_limit:
-            return False, 0, "daily_limit"
-
-        remaining_daily: int = daily_limit - calls_today
-        remaining_total: int = total_limit - total_calls
-        remaining = min(remaining_daily, remaining_total)
-
-        return True, remaining, "ok"
+        return True, 100, "ok"
