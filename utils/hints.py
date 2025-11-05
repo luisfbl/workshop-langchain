@@ -614,6 +614,11 @@ class HintManager:
 
         progress = self.firebase.get_progress(self.user_id)
         hints_used = progress.get("hints_used", {})
+
+        # Firebase pode retornar lista ao invés de dict quando chaves são números consecutivos
+        if isinstance(hints_used, list):
+            hints_used = {str(i): item for i, item in enumerate(hints_used) if item is not None}
+
         exercise_hints = hints_used.get(str(exercise_num), [])
 
         next_level = len(exercise_hints) + 1
@@ -660,6 +665,10 @@ class HintManager:
     def get_hint_stats(self) -> Dict[int, List[int]]:
         progress = self.firebase.get_progress(self.user_id)
         hints_used = progress.get("hints_used", {})
+
+        # Firebase pode retornar lista ao invés de dict quando chaves são números consecutivos
+        if isinstance(hints_used, list):
+            hints_used = {str(i): item for i, item in enumerate(hints_used) if item is not None}
 
         stats = {}
         for ex_str, levels in hints_used.items():
